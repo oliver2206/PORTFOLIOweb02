@@ -421,7 +421,7 @@ const GLOBAL_STYLES = `
 `;
 
 const PROJECTS = [
-  { id: 1, img: './PNGFILE/PORTRAIT.jpg', title: 'Portrait Retouch', desc: 'Professional portrait retouching with skin smoothing and color grading.', link: './dsfgh.html' },
+  { id: 1, img: './PNGFILE/PORTRAIT.png', title: 'Portrait Retouch', desc: 'Professional portrait retouching with skin smoothing and color grading.', link: './dsfgh.html' },
   { id: 2, img: './PNGFILE/TRIPPLE EXPOSURE 1.jpg', title: 'Triple Exposure I', desc: 'Creative triple exposure photo compositing effect.', link: './dsfgh.html' },
   { id: 3, img: './PNGFILE/TRIPPLE EXPOSURE 2.jpg', title: 'Triple Exposure II', desc: 'Second series of triple exposure artistic photography.', link: './dsfgh.html' },
   { id: 4, img: './PNGFILE/Untitled-1.png', title: 'Coffee Shop Brand', desc: 'Logo and brand identity for The Daily Grind Coffee Shop.', link: './THE DAILY GRIND COFFEE SHOP.html' },
