@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
-
 const heroVideo = '/videos/virtual-tour-vigan.mp4';
+const backgroundAudio = '/audio/background-music.mp3'; // Add your audio file path
 
 const GLOBAL_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
@@ -227,6 +227,33 @@ const GLOBAL_STYLES = `
 
   #scroll-top-btn:hover {
     background: #2673cc;
+    transform: scale(1.1);
+  }
+
+  /* Sound Toggle Button */
+  .sound-toggle {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    color: #3391ff;
+    border: 1px solid rgba(51, 145, 255, 0.3);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 999;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sound-toggle:hover {
+    background: #3391ff;
+    color: #fff;
     transform: scale(1.1);
   }
 
@@ -681,7 +708,10 @@ function Home({ navigate }) {
   const typed = useTypingEffect(['UI/UX Designer', 'Photo Retoucher', 'Marketing Artist']);
   const [activeModal, setActiveModal] = useState(null);
   const videoRef = useRef(null);
+  const audioRef = useRef(null);
   const [videoError, setVideoError] = useState(false);
+  const [isAudioMuted, setIsAudioMuted] = useState(true); // Start muted due to browser policies
+  const [audioSupported, setAudioSupported] = useState(true);
 
   // Initialize video for full screen playback
   useEffect(() => {
@@ -699,16 +729,6 @@ function Home({ navigate }) {
       } catch (err) {
         console.log('Auto-play prevented:', err);
         setVideoError(true);
-        // Try to play on user interaction
-        const playOnInteraction = () => {
-          video.play().catch(e => console.log('Still failed:', e));
-          document.removeEventListener('click', playOnInteraction);
-          document.removeEventListener('touchstart', playOnInteraction);
-          document.removeEventListener('scroll', playOnInteraction);
-        };
-        document.addEventListener('click', playOnInteraction);
-        document.addEventListener('touchstart', playOnInteraction);
-        document.addEventListener('scroll', playOnInteraction);
       }
     };
 
@@ -719,7 +739,6 @@ function Home({ navigate }) {
     
     video.addEventListener('error', handleError);
     
-    // Small delay to ensure video is ready
     const timer = setTimeout(attemptPlay, 100);
 
     return () => {
@@ -731,11 +750,79 @@ function Home({ navigate }) {
     };
   }, []);
 
+  // Initialize audio with user interaction
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.loop = true;
+    audio.volume = 0.3; // Set to 30% volume for background music
+    
+    const handleUserInteraction = () => {
+      if (audio && !isAudioMuted) {
+        audio.play().catch(err => {
+          console.log('Audio play failed:', err);
+          setAudioSupported(false);
+        });
+      }
+      // Remove listeners after first interaction
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('scroll', handleUserInteraction);
+    };
+
+    // Try to autoplay (will likely fail, but attempt anyway)
+    if (!isAudioMuted) {
+      audio.play().catch(() => {
+        // Wait for user interaction
+        document.addEventListener('click', handleUserInteraction);
+        document.addEventListener('touchstart', handleUserInteraction);
+        document.addEventListener('scroll', handleUserInteraction);
+      });
+    }
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('scroll', handleUserInteraction);
+      if (audio) {
+        audio.pause();
+      }
+    };
+  }, [isAudioMuted]);
+
+  const toggleSound = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    if (isAudioMuted) {
+      // Unmute and play
+      audio.volume = 0.3;
+      audio.play().then(() => {
+        setIsAudioMuted(false);
+      }).catch(err => {
+        console.log('Failed to play audio:', err);
+        setAudioSupported(false);
+      });
+    } else {
+      // Mute
+      audio.pause();
+      setIsAudioMuted(true);
+    }
+  };
+
   const titleEndDelay = 0.3 + ('I Am a'.length - 1) * 0.05 + 0.3;
   const subDelay = titleEndDelay + 0.2;
 
   return (
     <div style={{ background: '#000', color: '#fff' }}>
+      {/* Audio element for background music */}
+      <audio 
+        ref={audioRef} 
+        src={backgroundAudio} 
+        preload="auto"
+        muted={isAudioMuted}
+      />
       
       {/* HERO SECTION - FULL SCREEN VIDEO WITH NO BLACK BARS */}
       <div className="hero-section">
@@ -858,6 +945,17 @@ function Home({ navigate }) {
           <div className="scroll-indicator-line" />
         </div>
       </div>
+      
+      {/* Sound Toggle Button */}
+      {audioSupported && (
+        <button 
+          className="sound-toggle"
+          onClick={toggleSound}
+          title={isAudioMuted ? "Play Background Music" : "Mute Background Music"}
+        >
+          {isAudioMuted ? '🔇' : '🔊'}
+        </button>
+      )}
       
       {/* ABOUT SECTION */}
       <section style={{
@@ -1000,6 +1098,36 @@ function Home({ navigate }) {
       </button>
     </div>
   );
+}
+
+// Placeholder components for other pages (you can expand these)
+function About({ navigate }) {
+  return (
+    <div style={{ minHeight: '100vh', paddingTop: '100px', textAlign: 'center' }}>
+      <h1>About Page</h1>
+      <button onClick={() => navigate('home')} className="btn-blue">Back to Home</button>
+    </div>
+  );
+}
+
+function Experience() {
+  return <div style={{ minHeight: '100vh', paddingTop: '100px', textAlign: 'center' }}><h1>Experience Page</h1></div>;
+}
+
+function Gallery() {
+  return <div style={{ minHeight: '100vh', paddingTop: '100px', textAlign: 'center' }}><h1>Gallery Page</h1></div>;
+}
+
+function Testimonials() {
+  return <div style={{ minHeight: '100vh', paddingTop: '100px', textAlign: 'center' }}><h1>Testimonials Page</h1></div>;
+}
+
+function Contact() {
+  return <div style={{ minHeight: '100vh', paddingTop: '100px', textAlign: 'center' }}><h1>Contact Page</h1></div>;
+}
+
+function Portfolio() {
+  return <div style={{ minHeight: '100vh', paddingTop: '100px', textAlign: 'center' }}><h1>Portfolio Page</h1></div>;
 }
 
 export default function App() {
