@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-
 const heroVideo = '/videos/virtual-tour-vigan.mp4';
 
 const GLOBAL_STYLES = `
