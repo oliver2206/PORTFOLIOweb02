@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import About from './About';
+import Contact from './Contact';
 import Portfolio from './Portfolio';
 
 
