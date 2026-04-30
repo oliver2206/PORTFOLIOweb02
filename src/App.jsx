@@ -339,8 +339,8 @@ const GLOBAL_STYLES = `
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    min-width: 100%;
-    min-height: 100%;
+    min-width: 120%;
+    min-height: 120%;
     width: auto;
     height: auto;
     overflow: hidden;
