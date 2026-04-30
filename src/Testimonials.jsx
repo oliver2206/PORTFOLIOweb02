@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import About from './About';
 import Experience from './Experience';
 import Gallery from './Gallery';
-import Testimonails from './Testimonials';
 import Contact from './Contact';
 import Portfolio from './Portfolio';
 
