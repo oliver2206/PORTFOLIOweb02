@@ -1,1214 +1,268 @@
-import { useState, useEffect, useRef } from 'react';
-
-
-const heroVideo = '/videos/virtual-tour-vigan.mp4';
-
-const GLOBAL_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html, body {
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-  }
-
-  body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: #000;
-    color: #fff;
-  }
-
-  /* Navigation Styles */
-  .nav-link-item {
-    color: #3391ff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px 0;
-    transition: color 0.3s ease;
-    text-decoration: none;
-    position: relative;
-  }
-
-  .nav-link-item::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: #3391ff;
-    transition: width 0.3s ease;
-  }
-
-  .nav-link-item:hover::after {
-    width: 100%;
-  }
-
-  .nav-link-item:hover {
-    color: #fff;
-  }
-
-  /* Button Styles */
-  .btn-blue {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 32px;
-    border: 2px solid #3391ff;
-    background: #3391ff;
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    font-family: inherit;
-  }
-
-  .btn-blue:hover {
-    background: #2673cc;
-    border-color: #2673cc;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(51, 145, 255, 0.2);
-  }
-
-  .btn-outline-blue {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 32px;
-    border: 2px solid #3391ff;
-    background: transparent;
-    color: #3391ff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: inherit;
-  }
-
-  .btn-outline-blue:hover {
-    background: #3391ff;
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(51, 145, 255, 0.2);
-  }
-
-  /* Project Card Styles */
-  .project-card {
-    background: #111;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .project-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
-  }
-
-  .project-card img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s ease;
-  }
-
-  .project-card:hover img {
-    transform: scale(1.05);
-  }
-
-  .project-card-button {
-    margin-top: 12px;
-    display: inline-block;
-    background: #3391ff;
-    color: #fff;
-    padding: 8px 20px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: background 0.3s ease;
-  }
-
-  .project-card-button:hover {
-    background: #2673cc;
-  }
-
-  /* Modal Styles */
-  .modal-overlay {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    backdrop-filter: blur(5px);
-  }
-
-  .modal-content-box {
-    background: linear-gradient(135deg, #1a1a2e 0%, #111 100%);
-    color: #fff;
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 800px;
-    width: 100%;
-    text-align: center;
-    position: relative;
-    overflow: auto;
-    max-height: 90vh;
-    border: 1px solid rgba(51, 145, 255, 0.2);
-  }
-
-  .modal-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 2rem;
-    color: #fff;
-    cursor: pointer;
-    background: rgba(51, 145, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    transition: background 0.3s;
-  }
-
-  .modal-close-btn:hover {
-    background: #3391ff;
-  }
-
-  .modal-img {
-    width: 100%;
-    max-height: 60vh;
-    object-fit: contain;
-    border-radius: 12px;
-    margin-bottom: 20px;
-  }
-
-  /* Scroll Top Button */
-  #scroll-top-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #3391ff;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 22px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(51, 145, 255, 0.4);
-    z-index: 999;
-    transition: all 0.3s ease;
-  }
-
-  #scroll-top-btn:hover {
-    background: #2673cc;
-    transform: scale(1.1);
-  }
-
-  /* Animations */
-  @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(40px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  @keyframes floatDown {
-    0%, 100% {
-      transform: translateX(-50%) translateY(0);
-    }
-    50% {
-      transform: translateX(-50%) translateY(10px);
-    }
-  }
-
-  @keyframes letterIn {
-    from {
-      opacity: 0;
-      transform: translateY(40px) rotate(6deg);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) rotate(0deg);
-    }
-  }
-
-  @keyframes wordIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .cursor-blink {
-    animation: blink 0.75s step-end infinite;
-  }
-
-  .hero-letter {
-    display: inline-block;
-    opacity: 0;
-    transform: translateY(40px) rotate(6deg);
-    animation: letterIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-
-  .hero-sub-word {
-    display: inline-block;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: wordIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    margin-right: 0.3em;
-  }
-
-  .scroll-indicator {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    z-index: 10;
-    opacity: 0.7;
-    animation: floatDown 2s ease-in-out infinite;
-  }
-
-  .scroll-indicator span {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #3391ff;
-    font-weight: 500;
-  }
-
-  .scroll-indicator-line {
-    width: 1px;
-    height: 50px;
-    background: linear-gradient(to bottom, #3391ff, transparent);
-  }
-
-  /* FULL SCREEN HERO SECTION - NO BLACK BARS */
-  .hero-section {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* Video container that fills the entire screen */
-  .hero-video-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    min-width: 150%;
-    min-height: 150%;
-    width: auto;
-    height: auto;
-    overflow: hidden;
-  }
-
-  /* Video that covers the entire screen without black bars */
-  .hero-video {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: cover;
-  }
-
-  /* Dark overlay for text readability */
-  .hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 1;
-  }
-
-  /* Content wrapper */
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 0 20px;
-  }
-
-  /* Ensure body and root take full width */
-  #root {
-    width: 100%;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .hero-title {
-      font-size: 2.5rem !important;
-    }
-    .hero-typed {
-      font-size: 1.8rem !important;
-    }
-    .projects-grid {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-    .about-section {
-      flex-direction: column;
-    }
-    .about-left {
-      min-height: 350px;
-    }
-    .about-right {
-      padding: 40px 24px !important;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .projects-grid {
-      grid-template-columns: 1fr !important;
-    }
-  }
-`;
-
-const PROJECTS = [
-    { id: 1, img: './PNGFILE/PORTRAIT.jpg', title: 'Portrait Retouch', desc: 'Professional portrait retouching with skin smoothing and color grading.', link: './dsfgh.html' },
-    { id: 2, img: './PNGFILE/TRIPPLE EXPOSURE 1.jpg', title: 'Triple Exposure I', desc: 'Creative triple exposure photo compositing effect.', link: './dsfgh.html' },
-    { id: 3, img: './PNGFILE/TRIPPLE EXPOSURE 2.jpg', title: 'Triple Exposure II', desc: 'Second series of triple exposure artistic photography.', link: './dsfgh.html' },
-    { id: 4, img: './PNGFILE/Untitled-1.png', title: 'Coffee Shop Brand', desc: 'Logo and brand identity for The Daily Grind Coffee Shop.', link: './THE DAILY GRIND COFFEE SHOP.html' },
-    { id: 5, img: '', title: 'Project 5', desc: 'Description for project 5 goes here.', link: './dsfgh.html' },
-    { id: 6, img: './PNGFILE/TEATEA.png', title: 'Teazy Taste', desc: 'Brand design and visual identity for a milk tea business.', link: './teazy taste.html' },
-    { id: 7, img: './PNGFILE/peanut sarap.png', title: 'Peanut Sarap', desc: 'Product packaging and marketing design for local snack brand.', link: './dsfgh.html' },
-    { id: 8, img: './PNGFILE/ginatang kuhol.png', title: 'Ginatang Kuhol', desc: 'Food photography and visual design for local delicacy.', link: './dsfgh.html' },
-    { id: 9, img: './PNGFILE/PROJECT9.jpg', title: 'Project 9', desc: 'Description for project 9 goes here.', link: './dsfgh.html' },
-    { id: 10, img: './PNGFILE/MILKTEA 3.jpg', title: 'Milk Tea Campaign', desc: 'Marketing visuals and promotional design for milk tea brand.', link: './dsfgh.html' },
-];
-
-function useTypingEffect(words) {
-    const [text, setText] = useState('');
-    const [wordIdx, setWordIdx] = useState(0);
-    const [charIdx, setCharIdx] = useState(0);
-    const [deleting, setDeleting] = useState(false);
-
-    useEffect(() => {
-        const current = words[wordIdx];
-        let timeout;
-
-        if (!deleting && charIdx === current.length) {
-            timeout = setTimeout(() => setDeleting(true), 2000);
-        } else if (deleting && charIdx === 0) {
-            setDeleting(false);
-            setWordIdx((i) => (i + 1) % words.length);
-        } else {
-            const next = deleting ? charIdx - 1 : charIdx + 1;
-            timeout = setTimeout(() => {
-                setText(current.substring(0, next));
-                setCharIdx(next);
-            }, deleting ? 50 : 100);
-        }
-
-        return () => clearTimeout(timeout);
-    }, [charIdx, deleting, wordIdx, words]);
-
-    return text;
-}
-
-function Modal({ project, onClose }) {
-    if (!project) return null;
-
-    return ( <
-        div className = "modal-overlay"
-        onClick = {
-            (e) => e.target === e.currentTarget && onClose() } >
-        <
-        div className = "modal-content-box" >
-        <
-        button className = "modal-close-btn"
-        onClick = { onClose } > × < /button> <
-        img className = "modal-img"
-        src = { project.img || 'https://via.placeholder.com/800x500?text=No+Image' }
-        alt = { project.title }
-        /> <
-        h2 style = {
-            { marginBottom: '12px', color: '#3391ff' } } > { project.title } < /h2> <
-        p style = {
-            { color: '#ccc', marginBottom: '20px', lineHeight: 1.6 } } > { project.desc } < /p> <
-        div style = {
-            { display: 'flex', gap: '15px', justifyContent: 'center' } } >
-        <
-        a href = { project.link }
-        target = "_blank"
-        rel = "noreferrer"
-        className = "btn-blue" > View More < /a> <
-        a href = { project.link }
-        target = "_blank"
-        rel = "noreferrer"
-        className = "btn-outline-blue" > Full Project < /a> <
-        /div> <
-        /div> <
-        /div>
-    );
-}
-
-function MobileNav({ open, onClose, navigate }) {
-    if (!open) return null;
-
-    const go = (page) => {
-        navigate(page);
-        onClose();
-    };
-
-    return ( <
-        div style = {
-            {
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: '#0a0a0a',
-                zIndex: 9999,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-            }
-        } >
-        <
-        button onClick = { onClose }
-        style = {
-            {
-                position: 'absolute',
-                top: '20px',
-                right: '30px',
-                fontSize: '2.5rem',
-                cursor: 'pointer',
-                color: '#3391ff',
-                background: 'none',
-                border: 'none',
-            }
-        } >
-        ×
-        <
-        /button>
-
-        <
-        div style = {
-            { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '25px' } } > {
-            ['about', 'experience', 'gallery', 'testimonials', 'contact', 'portfolio'].map((page) => ( <
-                button key = { page }
-                onClick = {
-                    () => go(page) }
-                style = {
-                    {
-                        fontSize: '1.5rem',
-                        color: '#3391ff',
-                        fontWeight: '600',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        textTransform: 'capitalize',
-                        transition: 'color 0.3s',
-                    }
-                }
-                onMouseEnter = {
-                    (e) => (e.target.style.color = '#fff') }
-                onMouseLeave = {
-                    (e) => (e.target.style.color = '#3391ff') } >
-                { page.charAt(0).toUpperCase() + page.slice(1) } <
-                /button>
-            ))
-        } <
-        /div> <
-        /div>
-    );
-}
-
-function Navbar({ currentPage, navigate }) {
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const NAV_LINKS = ['about', 'experience', 'gallery', 'testimonials', 'contact', 'portfolio'];
-
-    useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 50);
-        window.addEventListener('scroll', onScroll);
-        return () => window.removeEventListener('scroll', onScroll);
-    }, []);
-
-    return ( <
-        >
-        <
-        header style = {
-            {
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
-                zIndex: 100,
-                background: scrolled ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.5)',
-                backdropFilter: scrolled ? 'blur(10px)' : 'blur(5px)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                transition: 'all 0.3s ease',
-            }
-        } >
-        <
-        nav style = {
-            {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 5%',
-                height: '70px',
-                maxWidth: '1400px',
-                margin: '0 auto',
-            }
-        } >
-        <
-        button onClick = {
-            () => navigate('home') }
-        style = {
-            {
-                fontFamily: "'Syne', sans-serif",
-                fontSize: '1.5rem',
-                fontWeight: 800,
-                color: '#3391ff',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-            }
-        } >
-        MySite <
-        /button>
-
-        <
-        div style = {
-            { display: 'flex', gap: '35px', alignItems: 'center' } }
-        className = "desktop-nav" > {
-            NAV_LINKS.map((link) => ( <
-                button key = { link }
-                className = "nav-link-item"
-                onClick = {
-                    () => navigate(link) }
-                style = {
-                    { color: currentPage === link ? '#fff' : '#3391ff' } } >
-                { link.charAt(0).toUpperCase() + link.slice(1) } <
-                /button>
-            ))
-        } <
-        /div>
-
-        <
-        button onClick = {
-            () => setMobileOpen(true) }
-        style = {
-            {
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '1.8rem',
-                color: '#3391ff',
-                display: 'none',
-            }
-        }
-        className = "hamburger" >
-        ☰
-        <
-        /button> <
-        /nav> <
-        /header>
-
-        <
-        style > { `
-          @media (max-width: 991px) {
-            .desktop-nav { display: none !important; }
-            .hamburger { display: block !important; }
-          }
-        ` } <
-        /style>
-
-        <
-        MobileNav open = { mobileOpen }
-        onClose = {
-            () => setMobileOpen(false) }
-        navigate = { navigate }
-        /> <
-        />
-    );
-}
-
-function AnimatedLetters({ text, baseDelay = 0, color }) {
-    return ( <
-        > {
-            [...text].map((ch, i) => ( <
-                span key = { i }
-                className = "hero-letter"
-                style = {
-                    {
-                        animationDelay: `${baseDelay + i * 0.05}s`,
-                        color: color || 'inherit',
-                    }
-                } >
-                { ch === ' ' ? '\u00a0' : ch } <
-                /span>
-            ))
-        } <
-        />
-    );
-}
-
-function AnimatedWords({ text, baseDelay = 0 }) {
-    return ( <
-        > {
-            text.split(' ').map((word, i) => ( <
-                span key = { i }
-                className = "hero-sub-word"
-                style = {
-                    { animationDelay: `${baseDelay + i * 0.07}s` } } >
-                { word } <
-                /span>
-            ))
-        } <
-        />
-    );
-}
-
-function Home({ navigate }) {
-    const typed = useTypingEffect(['UI/UX Designer', 'Photo Retoucher', 'Marketing Artist']);
-    const [activeModal, setActiveModal] = useState(null);
-    const videoRef = useRef(null);
-    const [videoError, setVideoError] = useState(false);
-
-    // Initialize video for full screen playback
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
-
-        video.muted = true;
-        video.loop = true;
-        video.playsInline = true;
-        video.setAttribute('playsinline', 'true');
-
-        const attemptPlay = async() => {
-            try {
-                await video.play();
-            } catch (err) {
-                console.log('Auto-play prevented:', err);
-                setVideoError(true);
-                // Try to play on user interaction
-                const playOnInteraction = () => {
-                    video.play().catch(e => console.log('Still failed:', e));
-                    document.removeEventListener('click', playOnInteraction);
-                    document.removeEventListener('touchstart', playOnInteraction);
-                    document.removeEventListener('scroll', playOnInteraction);
-                };
-                document.addEventListener('click', playOnInteraction);
-                document.addEventListener('touchstart', playOnInteraction);
-                document.addEventListener('scroll', playOnInteraction);
-            }
-        };
-
-        const handleError = () => {
-            console.error('Video failed to load');
-            setVideoError(true);
-        };
-
-        video.addEventListener('error', handleError);
-
-        // Small delay to ensure video is ready
-        const timer = setTimeout(attemptPlay, 100);
-
-        return () => {
-            clearTimeout(timer);
-            video.removeEventListener('error', handleError);
-            if (video) {
-                video.pause();
-            }
-        };
-    }, []);
-
-    const titleEndDelay = 0.3 + ('I Am a'.length - 1) * 0.05 + 0.3;
-    const subDelay = titleEndDelay + 0.2;
-
-    return ( <
-        div style = {
-            { background: '#000', color: '#fff' } } >
-
-        { /* HERO SECTION - FULL SCREEN VIDEO WITH NO BLACK BARS */ } <
-        div className = "hero-section" >
-
-        { /* Video Container - fills entire screen */ } <
-        div className = "hero-video-container" > {!videoError ? ( <
-                video ref = { videoRef }
-                className = "hero-video"
-                autoPlay muted loop playsInline >
-                <
-                source src = { heroVideo }
-                type = "video/mp4" / >
-                <
-                /video>
-            ) : ( <
-                div style = {
-                    {
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        background: 'linear-gradient(135deg, #0a0a2a 0%, #000 100%)',
-                    }
-                }
+import React, { useState } from 'react';
+
+const ContactPage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    message: '',
+    services: []
+  });
+
+  const servicesList = ['Branding', 'Digital Experiences', 'Web Development', 'Graphic Design', 'Content Creation'];
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleServiceToggle = (service) => {
+    setFormData(prev => ({
+      ...prev,
+      services: prev.services.includes(service)
+        ? prev.services.filter(s => s !== service)
+        : [...prev.services, service]
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Build email content
+    const subject = `Inquiry about: ${formData.services.join(', ')}`;
+    const body = `
+Hi Creation Niel,
+
+Service(s) Interested In: ${formData.services.join(', ')}
+
+Message:
+${formData.message || '(No message provided)'}
+
+Best regards,
+${formData.name}
+${formData.email}
+Phone: ${formData.phone || 'Not provided'}
+    `.trim();
+
+    // Create Gmail compose URL
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=creationniel6@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    // Open Gmail in new tab
+    window.open(gmailUrl, '_blank');
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    alert(`Copied: ${text}`);
+  };
+
+  const copyAllDetails = () => {
+    const details = `Email: creationniel6@gmail.com\nMobile: +63 912 345 6789`;
+    navigator.clipboard.writeText(details);
+    alert('All contact details copied to clipboard!');
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Hero Section - INQUIRE NOW */}
+      <div className="bg-black text-white py-16 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4">INQUIRE NOW</h1>
+          <p className="text-xl md:text-2xl text-gray-300">WE'D LOVE TO HEAR FROM YOU</p>
+        </div>
+      </div>
+
+      {/* REACH OUT Section */}
+      <div className="py-12 px-4 border-b">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-semibold text-gray-800">REACH OUT</h2>
+          <p className="text-gray-500 mt-2">CONTACT US NOW</p>
+        </div>
+      </div>
+
+      {/* Main Content - Two Column Layout */}
+      <div className="max-w-6xl mx-auto py-12 px-4">
+        <div className="grid md:grid-cols-2 gap-12">
+          {/* Left Column - Contact Info & Deal Text */}
+          <div>
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-3">WE OFFER ONE OF THE BEST DEALS IN THE MARKET.</h3>
+              <p className="text-gray-600 mb-2">We understand where our clients are coming from. They run a business. We do too.</p>
+              <p className="text-gray-600 mb-2">We come up with ways to cut cost and focus on the essentials that make a great branding experience.</p>
+              <p className="text-gray-800 font-semibold mt-4">We provide you top quality outputs at only a fraction of the price.</p>
+            </div>
+
+            {/* Contact Details */}
+            <div className="space-y-6">
+              {/* Email */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-500">EMAIL</p>
+                  <p className="font-medium text-gray-800">creationniel6@gmail.com</p>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-xs text-gray-400 bg-white px-2 py-1 rounded">G GMAIL</span>
+                  <button 
+                    onClick={() => copyToClipboard('creationniel6@gmail.com')}
+                    className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded transition"
+                  >
+                    COPY
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-500">MOBILE</p>
+                  <p className="font-medium text-gray-800">+63 912 345 6789</p>
+                </div>
+                <div className="flex gap-2">
+                  <button className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded transition">CALL</button>
+                  <button 
+                    onClick={() => copyToClipboard('+63 912 345 6789')}
+                    className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded transition"
+                  >
+                    COPY
+                  </button>
+                </div>
+              </div>
+
+              {/* Copy All Button */}
+              <button 
+                onClick={copyAllDetails}
+                className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition"
+              >
+                COPY ALL CONTACT DETAILS
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column - Contact Form */}
+          <div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="James Harry"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
                 />
-            )
-        } <
-        /div>
+              </div>
 
-        { /* Dark Overlay for better text readability */ } <
-        div className = "hero-overlay" / >
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="JamesHarry@gmail.com"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
+                />
+              </div>
 
-        { /* Content */ } <
-        div className = "hero-content" >
-        <
-        div style = {
-            { maxWidth: '800px', width: '90%' } } >
-        <
-        h3 style = {
-            {
-                fontFamily: "'Syne', sans-serif",
-                fontSize: '1rem',
-                color: '#3391ff',
-                fontWeight: 600,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                marginBottom: '20px',
-                opacity: 0,
-                animation: 'fadeUp 0.6s ease forwards',
-                animationDelay: '0.1s',
-            }
-        } >
-        HI THERE!👋
-        <
-        /h3>
+              {/* Phone Number (optional) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number (optional)</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="094525636332"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
+                />
+              </div>
 
-        <
-        h1 className = "hero-title"
-        style = {
-            {
-                fontFamily: "'Syne', sans-serif",
-                fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-                fontWeight: 800,
-                lineHeight: 1.1,
-                color: '#fff',
-                marginBottom: '15px',
-            }
-        } >
-        <
-        AnimatedLetters text = "I Am a"
-        baseDelay = { 0.3 }
-        color = "#fff" / >
-        <
-        /h1>
+              {/* Address (optional) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address (optional)</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  placeholder="City, Country"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
+                />
+              </div>
 
-        <
-        div className = "hero-typed"
-        style = {
-            {
-                fontFamily: "'Syne', sans-serif",
-                fontSize: 'clamp(2rem, 4.5vw, 3.5rem)',
-                fontWeight: 800,
-                color: '#3391ff',
-                marginBottom: '30px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '5px',
-                opacity: 0,
-                animation: 'fadeUp 0.5s ease forwards',
-                animationDelay: `${titleEndDelay}s`,
-            }
-        } >
-        <
-        span > { typed } < /span> <
-        span className = "cursor-blink"
-        style = {
-            {
-                display: 'inline-block',
-                width: '3px',
-                height: '1em',
-                background: '#3391ff',
-            }
-        }
-        /> <
-        /div>
+              {/* Message / Project Details */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Message / Project Details</label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  rows="3"
+                  placeholder="Tell me about your project..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition"
+                ></textarea>
+              </div>
 
-        <
-        p style = {
-            {
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-                lineHeight: 1.7,
-                maxWidth: '550px',
-                margin: '0 auto 40px',
-            }
-        } >
-        <
-        AnimatedWords text = "Creative web developer & graphic designer from the Philippines. I craft beautiful visuals and responsive digital experiences."
-        baseDelay = { subDelay }
-        /> <
-        /p>
+              {/* Services Interested In */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Services Interested In *</label>
+                <div className="flex flex-wrap gap-2">
+                  {servicesList.map(service => (
+                    <button
+                      key={service}
+                      type="button"
+                      onClick={() => handleServiceToggle(service)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                        formData.services.includes(service)
+                          ? 'bg-black text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {service}
+                    </button>
+                  ))}
+                </div>
+                {formData.services.length === 0 && (
+                  <p className="text-xs text-red-500 mt-1">Please select at least one service</p>
+                )}
+              </div>
 
-        <
-        div style = {
-            {
-                display: 'flex',
-                gap: '20px',
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-                opacity: 0,
-                animation: 'fadeUp 0.6s ease forwards',
-                animationDelay: `${subDelay + 1.2}s`,
-            }
-        } >
-        <
-        button className = "btn-blue"
-        onClick = {
-            () => navigate('about') } >
-        About Me👤 <
-        /button> <
-        button className = "btn-outline-blue"
-        onClick = {
-            () => navigate('portfolio') } >
-        View My Work <
-        /button> <
-        /div> <
-        /div> <
-        /div>
+              {/* File Attachment Instructions */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm font-medium text-blue-800 mb-2">How to attach files in Gmail (after clicking Send)</p>
+                <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
+                  <li>After you click "Send Message", Gmail will open in a new tab with your message pre-filled.</li>
+                  <li>Look for the <span className="font-bold">Attach files icon (paperclip)</span> at the bottom of the compose window.</li>
+                  <li>Click the paperclip icon, then select images, documents, or any files from your computer (design briefs, logos, references, etc.).</li>
+                  <li>You can also drag & drop files directly into the email window. Attachments appear as thumbnails below the subject line.</li>
+                  <li>Once files are attached, review your message and click Send - your attachments will be delivered along with the inquiry.</li>
+                </ol>
+                <p className="text-xs text-blue-600 mt-2 italic">Pro tip: Maximum attachment size in Gmail is 25MB. If your files are larger, share via Google Drive link or compress them before attaching</p>
+              </div>
 
-        { /* Scroll Indicator */ } <
-        div className = "scroll-indicator" >
-        <
-        span > SCROLL < /span> <
-        div className = "scroll-indicator-line" / >
-        <
-        /div> <
-        /div>
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition"
+              >
+                SEND MESSAGE
+              </button>
+              
+              <p className="text-xs text-gray-500 text-center">
+                Fill out the form, then click Send. Gmail will open with your message - simply attach your files using the paperclip icon.
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-        { /* ABOUT SECTION */ } <
-        section style = {
-            {
-                display: 'flex',
-                flexWrap: 'wrap',
-                width: '100%',
-                minHeight: '100vh',
-            }
-        } >
-        <
-        div style = {
-            {
-                flex: 1,
-                minWidth: '300px',
-                minHeight: '500px',
-                background: "url('./PNGFILE/profile.jpg') no-repeat center center / cover",
-            }
-        }
-        /> <
-        div style = {
-            {
-                flex: 1,
-                minWidth: '300px',
-                background: '#111',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                padding: '60px',
-            }
-        } >
-        <
-        h1 style = {
-            {
-                fontFamily: "'Syne', sans-serif",
-                fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-                fontWeight: 800,
-                color: '#3391ff',
-                marginBottom: '20px',
-            }
-        } >
-        About Me <
-        /h1> <
-        div style = {
-            {
-                width: '60px',
-                height: '3px',
-                background: '#3391ff',
-                marginBottom: '30px',
-            }
-        }
-        /> <
-        p style = {
-            {
-                fontSize: '1rem',
-                lineHeight: 1.7,
-                color: '#ccc',
-                marginBottom: '30px',
-            }
-        } >
-        I 'm Nathaniel Tolentino Oliver II, a creative web developer and designer from the Philippines.
-        With a strong eye
-        for design and a passion
-        for coding, I specialize in building responsive,
-        modern websites and web applications that leave a lasting impression. <
-        /p> <
-        ul style = {
-            {
-                listStyle: 'none',
-                marginBottom: '40px',
-            }
-        } >
-        <
-        li style = {
-            { marginBottom: '12px', color: '#ccc' } } >
-        <
-        strong style = {
-            { color: '#3391ff' } } > 📍Location: < /strong> Magsingal, Ilocos Sur, Philippines <
-        /li> <
-        li style = {
-            { marginBottom: '12px', color: '#ccc' } } >
-        <
-        strong style = {
-            { color: '#3391ff' } } > 📧Email: < /strong> nathaniel@example.com <
-        /li> <
-        li style = {
-            { marginBottom: '12px', color: '#ccc' } } >
-        <
-        strong style = {
-            { color: '#3391ff' } } > 📱Phone: < /strong> +63 XXX XXX XXXX <
-        /li> <
-        li style = {
-            { color: '#ccc' } } >
-        <
-        strong style = {
-            { color: '#3391ff' } } > ⚡Skills: < /strong> HTML, CSS, JS, React, Photoshop, Lightroom <
-        /li> <
-        /ul> <
-        div style = {
-            { display: 'flex', flexWrap: 'wrap', gap: '15px' } } >
-        <
-        button className = "btn-outline-blue"
-        onClick = {
-            () => navigate('portfolio') } >
-        Explore My Work <
-        /button> <
-        a href = "./Nathaniel_Oliver_CV.pdf"
-        target = "_blank"
-        rel = "noreferrer"
-        className = "btn-blue" >
-        Download CV📄 <
-        /a> <
-        /div> <
-        /div> <
-        /section>
-
-        { /* FEATURED PROJECTS */ } <
-        section style = {
-            { padding: '80px 20px', background: '#000' } } >
-        <
-        div style = {
-            { maxWidth: '1400px', margin: '0 auto' } } >
-        <
-        h2 style = {
-            {
-                textAlign: 'center',
-                fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-                marginBottom: '50px',
-                color: '#fff',
-                fontFamily: "'Syne', sans-serif",
-                fontWeight: 800,
-            }
-        } >
-        Featured Portfolio Projects <
-        /h2>
-
-        <
-        div className = "projects-grid"
-        style = {
-            {
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '25px',
-            }
-        } > {
-            PROJECTS.map((project) => ( <
-                div key = { project.id }
-                className = "project-card"
-                onClick = {
-                    () => setActiveModal(project) } >
-                <
-                img src = { project.img || 'https://via.placeholder.com/400x300?text=Project+Image' }
-                alt = { project.title }
-                onError = {
-                    (e) => {
-                        e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
-                    }
-                }
-                /> <
-                div style = {
-                    { padding: '20px' } } >
-                <
-                h3 style = {
-                    { color: '#fff', marginBottom: '8px', fontSize: '1.1rem' } } > { project.title } <
-                /h3> <
-                p style = {
-                    { color: '#aaa', fontSize: '0.85rem', marginBottom: '15px', lineHeight: 1.5 } } > { project.desc } <
-                /p> <
-                div className = "project-card-button" >
-                View Details→ <
-                /div> <
-                /div> <
-                /div>
-            ))
-        } <
-        /div>
-
-        <
-        div style = {
-            { textAlign: 'center', marginTop: '50px' } } >
-        <
-        button className = "btn-blue"
-        onClick = {
-            () => navigate('portfolio') } >
-        View All Projects <
-        /button> <
-        /div> <
-        /div> <
-        /section>
-
-        <
-        Modal project = { activeModal }
-        onClose = {
-            () => setActiveModal(null) }
-        />
-
-        { /* Scroll to Top Button */ } <
-        button id = "scroll-top-btn"
-        onClick = {
-            () => window.scrollTo({ top: 0, behavior: 'smooth' }) } >
-        ↑
-        <
-        /button> <
-        /div>
-    );
-}
-
-export default function App() {
-    const [page, setPage] = useState('home');
-
-    const navigate = (pageId) => {
-        setPage(pageId);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const renderPage = () => {
-        switch (page) {
-            case 'home':
-                return <Home navigate = { navigate }
-                />;
-            case 'about':
-                return <About navigate = { navigate }
-                />;
-            case 'experience':
-                return <Experience / > ;
-            case 'gallery':
-                return <Gallery / > ;
-            case 'testimonials':
-                return <Testimonials / > ;
-            case 'contact':
-                return <Contact / > ;
-            case 'portfolio':
-                return <Portfolio / > ;
-            default:
-                return <Home navigate = { navigate }
-                />;
-        }
-    };
-
-    return ( <
-        div style = {
-            {
-                background: '#000',
-                minHeight: '100vh',
-                width: '100%',
-                overflowX: 'hidden',
-            }
-        } >
-        <
-        style > { GLOBAL_STYLES } < /style> <
-        Navbar currentPage = { page }
-        navigate = { navigate }
-        /> <
-        main key = { page } > { renderPage() } < /main> <
-        footer style = {
-            {
-                padding: '40px 5%',
-                background: '#030305',
-                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-                textAlign: 'center',
-            }
-        } >
-        <
-        p style = {
-            { color: '#666', fontSize: '0.85rem' } } > ©{ new Date().getFullYear() }
-        Nathaniel Oliver— All rights reserved. <
-        /p> <
-        /footer> <
-        /div>
-    );
-}
+export default ContactPage;
