@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-
+import Portfolio from './Portfolio';
 
 const heroVideo = '/videos/virtual-tour-vigan.mp4';
 
