@@ -1,253 +1,274 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from './assets/vite.svg';
-import heroImg from './assets/hero.png';
+import { useState, useEffect, useRef } from 'react';
 import './App.css';
 
+// Sample project data
+const PROJECTS = [
+  { id: 1, img: './PNGFILE/PORTRAIT.jpg', title: 'Project 1', desc: 'Description for project 1 goes here.', link: './dsfgh.html' },
+  { id: 2, img: './PNGFILE/TRIPPLE EXPOSURE 1.jpg', title: 'Project 2', desc: 'Description for project 2 goes here.', link: './dsfgh.html' },
+  { id: 3, img: './PNGFILE/TRIPPLE EXPOSURE 2.jpg', title: 'Project 3', desc: 'Description for project 3 goes here.', link: './dsfgh.html' },
+  { id: 4, img: './PNGFILE/Untitled-1.png', title: 'Project 4', desc: 'Description for project 4 goes here.', link: './THE DAILY GRIND COFFEE SHOP.html' },
+  { id: 5, img: '', title: 'Project 5', desc: 'Description for project 5 goes here.', link: './dsfgh.html' },
+  { id: 6, img: './PNGFILE/TEATEA.png', title: 'Project 6', desc: 'Description for project 6 goes here.', link: './teazy taste.html' },
+  { id: 7, img: './PNGFILE/peanut sarap.png', title: 'Project 7', desc: 'Description for project 7 goes here.', link: './dsfgh.html' },
+  { id: 8, img: './PNGFILE/ginatang kuhol.png', title: 'Project 8', desc: 'Description for project 8 goes here.', link: './dsfgh.html' },
+  { id: 9, img: './PNGFILE/PROJECT9.jpg', title: 'Project 9', desc: 'Description for project 9 goes here.', link: './dsfgh.html' },
+  { id: 10, img: './PNGFILE/MILKTEA 3.jpg', title: 'Project 10', desc: 'Description for project 10 goes here.', link: './dsfgh.html' },
+];
+
 function App() {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [showContact, setShowContact] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const videoRef = useRef(null);
+  const audioRef = useRef(null);
 
-  // Portfolio projects data from the screenshot
-  const projects = [
-    { id: 1, title: "TRIPPLE EXPOSURE POSTER IMAGE", category: "poster", tags: ["Poster", "Experimental"] },
-    { id: 2, title: "TRIPPLE EXPOSURE POSTER IMAGE", category: "poster", tags: ["Poster", "Double Exposure"] },
-    { id: 3, title: "THE DAILY GRIND COFFEE SHOP", category: "branding", tags: ["Branding", "Menu"] },
-    { id: 4, title: "TEAZY TASTE LOGO", category: "logo", tags: ["Logo", "Minimalist"] },
-    { id: 5, title: "PEANUTSARAP DELIGHT LOGO", category: "logo", tags: ["Logo", "Playful"] },
-    { id: 6, title: "EFFECT FOR A RAINY DAY VATAANG KUHOL", category: "editing", tags: ["Photo Effect", "Cinematic"] },
-    { id: 7, title: "LIGHTROOM ADJUSTMENT EDITING", category: "editing", tags: ["Color Grading", "Lightroom"] },
-    { id: 8, title: "GINATANG KOHOL THUMBNAIL", category: "thumbnail", tags: ["Thumbnail", "YouTube"] },
-    { id: 9, title: "MILKTEA LOUNGE MENU", category: "menu", tags: ["Menu Design", "Typography"] },
-    { id: 10, title: "IHAWAN LOGO", category: "logo", tags: ["Logo", "Grill", "Restaurant"] },
-    { id: 11, title: "MARITES CRAB PASTE", category: "packaging", tags: ["Packaging", "Label Design"] },
-  ];
+  // Typing effect
+  const [typingText, setTypingText] = useState('');
+  const [wordIndex, setWordIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const textList = ['UI/UX Designer', 'Photo Retoucher', 'Marketing Artist'];
 
-  const filteredProjects = activeFilter === 'all' 
-    ? projects 
-    : projects.filter(p => p.category === activeFilter);
+  useEffect(() => {
+    const current = textList[wordIndex];
+    let timeout;
 
-  // Skill tags from About Me section
-  const skills = ["HTML", "CSS", "JavaScript", "UI/UX", "Responsive Design", "Photo Retouching", "Lightroom", "Branding"];
+    if (!isDeleting && charIndex === current.length) {
+      timeout = setTimeout(() => setIsDeleting(true), 1500);
+    } else if (isDeleting && charIndex === 0) {
+      setIsDeleting(false);
+      setWordIndex((prev) => (prev + 1) % textList.length);
+      timeout = setTimeout(() => {}, 500);
+    } else {
+      const next = isDeleting ? charIndex - 1 : charIndex + 1;
+      timeout = setTimeout(() => {
+        setTypingText(current.substring(0, next));
+        setCharIndex(next);
+      }, isDeleting ? 50 : 100);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, wordIndex]);
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Video/Audio intersection observer
+  useEffect(() => {
+    const heroSection = document.getElementById('home');
+    const video = videoRef.current;
+    const audio = audioRef.current;
+
+    if (!heroSection || !video) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+            audio?.play().catch(() => {});
+          } else {
+            video.pause();
+            audio?.pause();
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(heroSection);
+
+    // Auto-play unlock on user interaction
+    const unlockAudio = () => {
+      audio?.play().catch(() => {});
+      document.removeEventListener('click', unlockAudio);
+    };
+    document.addEventListener('click', unlockAudio);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('click', unlockAudio);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openModal = (project) => {
+    setSelectedProject(project);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setSelectedProject(null);
+    document.body.style.overflow = 'auto';
+  };
+
+  const closeOnOutsideClick = (e) => {
+    if (e.target.classList.contains('modal')) {
+      closeModal();
+    }
+  };
 
   return (
     <div className="app">
-      {/* Header / Navigation */}
-      <header className="header">
-        <div className="container">
-          <nav className="navbar">
-            <div className="logo">
-              <span className="logo-icon">✨</span>
-              Nathan<span className="logo-highlight">iel</span>
-            </div>
-            <ul className="nav-links">
-              <li><a href="#home" className="nav-link active">Home</a></li>
-              <li><a href="#about" className="nav-link">About</a></li>
-              <li><a href="#portfolio" className="nav-link">Portfolio</a></li>
-              <li><a href="#contact" className="nav-link" onClick={(e) => { e.preventDefault(); setShowContact(true); }}>Contact</a></li>
+      {/* Header / Navbar */}
+      <header>
+        <nav className="navbar container-fluid px-5">
+          <a className="navbar-brand fw-bold" href="./Index.html">MySite</a>
+          <button className="navbar-toggler" type="button" onClick={() => setMobileNavOpen(true)}>
+            <span className="bi bi-list fs-1">☰</span>
+          </button>
+          <div className="collapse navbar-collapse justify-content-center d-none d-lg-flex">
+            <ul className="navbar-nav">
+              <li className="nav-item"><a className="nav-link" href="#about">About</a></li>
+              <li className="nav-item"><a className="nav-link" href="#experience">Experience</a></li>
+              <li className="nav-item"><a className="nav-link" href="#gallery">Gallery</a></li>
+              <li className="nav-item"><a className="nav-link" href="#testimonials">Testimonials</a></li>
+              <li className="nav-item"><a className="nav-link" href="#contact">Contact</a></li>
+              <li className="nav-item"><a className="nav-link" href="#portfolio">Portfolio</a></li>
             </ul>
-            <button className="cv-btn">Download CV</button>
-          </nav>
-        </div>
+          </div>
+        </nav>
       </header>
 
-      <main>
-        {/* Hero Section - "Hi There! I Am a Photo Retoucher" */}
-        <section id="home" className="hero">
-          <div className="container hero-grid">
-            <div className="hero-content">
-              <div className="hero-greeting">
-                <span className="wave-hand">👋</span>
-                <span className="greeting-text">Hi There!</span>
-              </div>
-              <h1 className="hero-title">
-                I Am a <span className="highlight">Photo Retoucher</span>
-                <br />& Creative Developer
-              </h1>
-              <p className="hero-description">
-                Transforming ordinary images into extraordinary visual stories. 
-                Based in the Philippines, crafting powerful digital experiences.
-              </p>
-              <div className="hero-buttons">
-                <button className="btn btn-primary">Explore My Work</button>
-                <button className="btn btn-outline">View Portfolio</button>
-              </div>
-              <div className="tech-stack">
-                {skills.slice(0, 5).map((skill, idx) => (
-                  <span key={idx} className="tech-tag">{skill}</span>
-                ))}
-              </div>
-            </div>
-            <div className="hero-image-wrapper">
-              <div className="hero-image">
-                <img src={heroImg} alt="Nathaniel Tolentino Oliver II - Creative Developer" />
-                <div className="image-badge">
-                  <span>📍 Magsingal, Ilocos Sur</span>
-                </div>
-              </div>
-            </div>
+      {/* Mobile Nav Overlay */}
+      {mobileNavOpen && (
+        <div className="mobile-nav-overlay active">
+          <button className="close-btn" onClick={() => setMobileNavOpen(false)}>×</button>
+          <div className="social-icons">
+            <a href="https://www.behance.net/" target="_blank" rel="noreferrer">Be</a>
+            <a href="https://www.facebook.com/" target="_blank" rel="noreferrer">Fb</a>
+            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Ig</a>
           </div>
-        </section>
-
-        {/* About Me Section - from second screenshot */}
-        <section id="about" className="about">
-          <div className="container">
-            <div className="section-header">
-              <span className="section-tag">Get to know me</span>
-              <h2>About Me</h2>
-              <div className="section-line"></div>
-            </div>
-            <div className="about-grid">
-              <div className="about-text">
-                <h3>Nathaniel Tolentino Oliver II</h3>
-                <p className="about-role">Creative Web Developer & Designer from the Philippines</p>
-                <p className="about-desc">
-                  I specialize in building responsive, modern websites and web applications that combine 
-                  aesthetics with powerful functionality. With a passion for both development and visual storytelling, 
-                  I bring ideas to life through clean code and captivating design.
-                </p>
-                <div className="about-info">
-                  <div className="info-item">
-                    <span className="info-label">📍 Location:</span>
-                    <span>Magsingal, Ilocos Sur, Philippines</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">📧 Email:</span>
-                    <span>nathaniel.oliver@creative.dev</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">📞 Phone:</span>
-                    <span>+63 912 345 6789</span>
-                  </div>
-                </div>
-                <div className="skills-section">
-                  <p className="skills-label">Core Expertise</p>
-                  <div className="skills-cloud">
-                    {skills.map((skill, idx) => (
-                      <span key={idx} className="skill-badge">{skill}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className="about-actions">
-                  <button className="btn btn-primary">Explore My Work</button>
-                  <button className="btn btn-outline">Download CV 📄</button>
-                </div>
-              </div>
-              <div className="about-stats">
-                <div className="stat-card">
-                  <div className="stat-number">5+</div>
-                  <div className="stat-label">Years Experience</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-number">50+</div>
-                  <div className="stat-label">Projects Completed</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-number">24/7</div>
-                  <div className="stat-label">Creative Flow</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Portfolio Section - Featured Projects from third screenshot */}
-        <section id="portfolio" className="portfolio">
-          <div className="container">
-            <div className="section-header">
-              <span className="section-tag">Creative Showcase</span>
-              <h2>Featured Portfolio Projects</h2>
-              <div className="section-line"></div>
-            </div>
-            
-            {/* Filter Buttons */}
-            <div className="filter-tabs">
-              {['all', 'poster', 'logo', 'branding', 'editing'].map(filter => (
-                <button 
-                  key={filter}
-                  className={`filter-btn ${activeFilter === filter ? 'active' : ''}`}
-                  onClick={() => setActiveFilter(filter)}
-                >
-                  {filter === 'all' ? 'All Works' : filter.charAt(0).toUpperCase() + filter.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Projects Grid */}
-            <div className="projects-grid">
-              {filteredProjects.map((project) => (
-                <div key={project.id} className="project-card">
-                  <div className="project-image">
-                    <div className="image-placeholder">
-                      <span className="placeholder-icon">🎨</span>
-                    </div>
-                    <div className="project-overlay">
-                      <button className="view-btn">View Details →</button>
-                    </div>
-                  </div>
-                  <div className="project-info">
-                    <h3 className="project-title">{project.title}</h3>
-                    <div className="project-tags">
-                      {project.tags.map((tag, idx) => (
-                        <span key={idx} className="project-tag">{tag}</span>
-                      ))}
-                    </div>
-                    <a href="#" className="project-link">View Details <span>→</span></a>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Show all projects indicator - matching screenshot style */}
-            <div className="portfolio-footer">
-              <p>✨ 11+ creative projects • always exploring new aesthetics ✨</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Contact / Modal Section */}
-        {showContact && (
-          <div className="modal-overlay" onClick={() => setShowContact(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close" onClick={() => setShowContact(false)}>×</button>
-              <h3>Let's Connect</h3>
-              <p>Have a project in mind? I'd love to collaborate.</p>
-              <div className="contact-info-modal">
-                <div>📧 nathaniel.oliver@creative.dev</div>
-                <div>📞 +63 912 345 6789</div>
-                <div>📍 Magsingal, Ilocos Sur, PH</div>
-              </div>
-              <button className="btn btn-primary" onClick={() => setShowContact(false)}>Close</button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-brand">
-              <div className="logo">Nathan<span className="logo-highlight">iel</span></div>
-              <p>Creative Developer & Visual Storyteller</p>
-            </div>
-            <div className="footer-links">
-              <a href="#home">Home</a>
-              <a href="#about">About</a>
-              <a href="#portfolio">Portfolio</a>
-              <a href="#contact" onClick={(e) => { e.preventDefault(); setShowContact(true); }}>Contact</a>
-            </div>
-            <div className="footer-social">
-              <span>📷 IG</span>
-              <span>🐦 X</span>
-              <span>💼 LinkedIn</span>
-              <span>🎨 Behance</span>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>© 2025 Nathaniel Tolentino Oliver II | Magsingal, Ilocos Sur, Philippines</p>
+          <div className="nav-links">
+            <a href="#about" onClick={() => setMobileNavOpen(false)}>About</a>
+            <a href="#experience" onClick={() => setMobileNavOpen(false)}>Experience</a>
+            <a href="#gallery" onClick={() => setMobileNavOpen(false)}>Gallery</a>
+            <a href="#testimonials" onClick={() => setMobileNavOpen(false)}>Testimonials</a>
+            <a href="#contact" onClick={() => setMobileNavOpen(false)}>Contact</a>
+            <a href="#portfolio" onClick={() => setMobileNavOpen(false)}>Portfolio</a>
           </div>
         </div>
+      )}
+
+      {/* Hero Section */}
+      <section className="hero" id="home">
+        <div className="hero-video-container">
+          <video ref={videoRef} autoPlay muted loop playsInline id="hero-video">
+            <source src="./PNGFILE/Virtual Tour _ It's More Fun with You in Vigan (3).mp4" type="video/mp4" />
+          </video>
+          <div className="overlay"></div>
+        </div>
+
+        <div className="hero-text">
+          <h3>Hi There!</h3>
+          <h1>I Am a <span className="highlight" id="typing-text">{typingText}</span></h1>
+          <button className="btn" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>
+            About Me <span>👤</span>
+          </button>
+        </div>
+
+        <audio ref={audioRef} loop>
+          <source src="./background-music.mp3" type="audio/mpeg" />
+        </audio>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="about-section">
+        <div className="about-left">
+          <div className="about-text"></div>
+        </div>
+        <div className="about-right">
+          <h1>About Me</h1>
+          <div className="divider"></div>
+          <p>
+            I'm Nathaniel Tolentino Oliver II, a creative web developer and designer from the Philippines.
+            With a strong eye for design and a passion for coding, I specialize in building responsive,
+            modern websites and web applications. I love combining aesthetics with functionality to deliver
+            meaningful digital experiences.
+          </p>
+          <ul>
+            <li><strong>Location:</strong> Magsingal, Ilocos Sur, Philippines</li>
+            <li><strong>Email:</strong> nathaniel@example.com</li>
+            <li><strong>Phone:</strong> +63 912 345 6789</li>
+            <li><strong>Skills:</strong> React, Node.js, UI/UX, Photo Manipulation</li>
+          </ul>
+          <div className="about-buttons">
+            <button onClick={() => document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' })}>
+              Explore My Work
+            </button>
+            <a href="./Nathaniel_Oliver_CV.pdf" target="_blank" rel="noreferrer">Download CV</a>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Projects Section */}
+      <section id="portfolio" className="featured-projects">
+        <h2>Featured Portfolio Projects</h2>
+        <div className="projects-grid">
+          {PROJECTS.map((project) => (
+            <div key={project.id} className="project-card" onClick={() => openModal(project)}>
+              <img 
+                src={project.img || 'https://via.placeholder.com/400x300?text=No+Image'} 
+                alt={project.title}
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                }}
+              />
+              <div style={{ padding: '15px' }}>
+                <h3>{project.title}</h3>
+                <p style={{ color: '#ccc' }}>{project.desc}</p>
+                <div className="project-card-button">View Details →</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <a href="./Portfolio.html" style={{ textDecoration: 'none' }}>
+            <button className="view-all-btn">View All Projects</button>
+          </a>
+        </div>
+      </section>
+
+      {/* Modal */}
+      {selectedProject && (
+        <div className="modal" onClick={closeOnOutsideClick}>
+          <div className="modal-content">
+            <div className="modal-close" onClick={closeModal}>&times;</div>
+            <img 
+              className="modal-img" 
+              src={selectedProject.img || 'https://via.placeholder.com/800x500?text=No+Image'} 
+              alt={selectedProject.title}
+              onError={(e) => {
+                e.target.src = 'https://via.placeholder.com/800x500?text=No+Image';
+              }}
+            />
+            <h2>{selectedProject.title}</h2>
+            <p>{selectedProject.desc}</p>
+            <div className="modal-buttons">
+              <a href={selectedProject.link} target="_blank" rel="noreferrer" className="modal-btn">VIEW MORE</a>
+              <a href={selectedProject.link} target="_blank" rel="noreferrer" className="modal-btn">VIEW FULL PROJECT</a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button id="scrollToTopBtn" onClick={scrollToTop}>↑</button>
+      )}
+
+      {/* Footer */}
+      <footer>
+        <p>© {new Date().getFullYear()} Nathaniel Tolentino Oliver II — All rights reserved.</p>
       </footer>
     </div>
   );
