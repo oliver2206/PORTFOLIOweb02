@@ -1,9 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import Experience from './Experience';
-import Gallery from './Gallery';
-import Testimonails from './Testimonials';
-import Contact from './Contact';
-import Portfolio from './Portfolio';
+
 
 const About = () => {
   const [activeTab, setActiveTab] = useState('bio');
