@@ -1,1060 +1,440 @@
-import { useState, useEffect, useRef } from 'react';
-import About from './About';
-import Experience from './Experience';
-import Testimonails from './Testimonials';
-import Contact from './Contact';
-import Portfolio from './Portfolio';
+import { useState } from "react";
 
-const heroVideo = '/videos/virtual-tour-vigan.mp4';
-
-const GLOBAL_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html, body {
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-  }
-
-  body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: #000;
-    color: #fff;
-  }
-
-  /* Navigation Styles */
-  .nav-link-item {
-    color: #3391ff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px 0;
-    transition: color 0.3s ease;
-    text-decoration: none;
-    position: relative;
-  }
-
-  .nav-link-item::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: #3391ff;
-    transition: width 0.3s ease;
-  }
-
-  .nav-link-item:hover::after {
-    width: 100%;
-  }
-
-  .nav-link-item:hover {
-    color: #fff;
-  }
-
-  /* Button Styles */
-  .btn-blue {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 32px;
-    border: 2px solid #3391ff;
-    background: #3391ff;
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    font-family: inherit;
-  }
-
-  .btn-blue:hover {
-    background: #2673cc;
-    border-color: #2673cc;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(51, 145, 255, 0.2);
-  }
-
-  .btn-outline-blue {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 32px;
-    border: 2px solid #3391ff;
-    background: transparent;
-    color: #3391ff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: inherit;
-  }
-
-  .btn-outline-blue:hover {
-    background: #3391ff;
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(51, 145, 255, 0.2);
-  }
-
-  /* Project Card Styles */
-  .project-card {
-    background: #111;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .project-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
-  }
-
-  .project-card img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s ease;
-  }
-
-  .project-card:hover img {
-    transform: scale(1.05);
-  }
-
-  .project-card-button {
-    margin-top: 12px;
-    display: inline-block;
-    background: #3391ff;
-    color: #fff;
-    padding: 8px 20px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: background 0.3s ease;
-  }
-
-  .project-card-button:hover {
-    background: #2673cc;
-  }
-
-  /* Modal Styles */
-  .modal-overlay {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    backdrop-filter: blur(5px);
-  }
-
-  .modal-content-box {
-    background: linear-gradient(135deg, #1a1a2e 0%, #111 100%);
-    color: #fff;
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 800px;
-    width: 100%;
-    text-align: center;
-    position: relative;
-    overflow: auto;
-    max-height: 90vh;
-    border: 1px solid rgba(51, 145, 255, 0.2);
-  }
-
-  .modal-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 2rem;
-    color: #fff;
-    cursor: pointer;
-    background: rgba(51, 145, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    transition: background 0.3s;
-  }
-
-  .modal-close-btn:hover {
-    background: #3391ff;
-  }
-
-  .modal-img {
-    width: 100%;
-    max-height: 60vh;
-    object-fit: contain;
-    border-radius: 12px;
-    margin-bottom: 20px;
-  }
-
-  /* Scroll Top Button */
-  #scroll-top-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #3391ff;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 22px;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(51, 145, 255, 0.4);
-    z-index: 999;
-    transition: all 0.3s ease;
-  }
-
-  #scroll-top-btn:hover {
-    background: #2673cc;
-    transform: scale(1.1);
-  }
-
-  /* Animations */
-  @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(40px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  @keyframes floatDown {
-    0%, 100% {
-      transform: translateX(-50%) translateY(0);
-    }
-    50% {
-      transform: translateX(-50%) translateY(10px);
-    }
-  }
-
-  @keyframes letterIn {
-    from {
-      opacity: 0;
-      transform: translateY(40px) rotate(6deg);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) rotate(0deg);
-    }
-  }
-
-  @keyframes wordIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .cursor-blink {
-    animation: blink 0.75s step-end infinite;
-  }
-
-  .hero-letter {
-    display: inline-block;
-    opacity: 0;
-    transform: translateY(40px) rotate(6deg);
-    animation: letterIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-
-  .hero-sub-word {
-    display: inline-block;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: wordIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    margin-right: 0.3em;
-  }
-
-  .scroll-indicator {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    z-index: 10;
-    opacity: 0.7;
-    animation: floatDown 2s ease-in-out infinite;
-  }
-
-  .scroll-indicator span {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #3391ff;
-    font-weight: 500;
-  }
-
-  .scroll-indicator-line {
-    width: 1px;
-    height: 50px;
-    background: linear-gradient(to bottom, #3391ff, transparent);
-  }
-
-  /* FULL SCREEN HERO SECTION - NO BLACK BARS */
-  .hero-section {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* Video container that fills the entire screen */
-  .hero-video-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    min-width: 150%;
-    min-height: 150%;
-    width: auto;
-    height: auto;
-    overflow: hidden;
-  }
-
-  /* Video that covers the entire screen without black bars */
-  .hero-video {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: cover;
-  }
-
-  /* Dark overlay for text readability */
-  .hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 1;
-  }
-
-  /* Content wrapper */
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 0 20px;
-  }
-
-  /* Ensure body and root take full width */
-  #root {
-    width: 100%;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .hero-title {
-      font-size: 2.5rem !important;
-    }
-    .hero-typed {
-      font-size: 1.8rem !important;
-    }
-    .projects-grid {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-    .about-section {
-      flex-direction: column;
-    }
-    .about-left {
-      min-height: 350px;
-    }
-    .about-right {
-      padding: 40px 24px !important;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .projects-grid {
-      grid-template-columns: 1fr !important;
-    }
-  }
-`;
-
-const PROJECTS = [
-  { id: 1, img: './PNGFILE/PORTRAIT.jpg', title: 'Portrait Retouch', desc: 'Professional portrait retouching with skin smoothing and color grading.', link: './dsfgh.html' },
-  { id: 2, img: './PNGFILE/TRIPPLE EXPOSURE 1.jpg', title: 'Triple Exposure I', desc: 'Creative triple exposure photo compositing effect.', link: './dsfgh.html' },
-  { id: 3, img: './PNGFILE/TRIPPLE EXPOSURE 2.jpg', title: 'Triple Exposure II', desc: 'Second series of triple exposure artistic photography.', link: './dsfgh.html' },
-  { id: 4, img: './PNGFILE/Untitled-1.png', title: 'Coffee Shop Brand', desc: 'Logo and brand identity for The Daily Grind Coffee Shop.', link: './THE DAILY GRIND COFFEE SHOP.html' },
-  { id: 5, img: '', title: 'Project 5', desc: 'Description for project 5 goes here.', link: './dsfgh.html' },
-  { id: 6, img: './PNGFILE/TEATEA.png', title: 'Teazy Taste', desc: 'Brand design and visual identity for a milk tea business.', link: './teazy taste.html' },
-  { id: 7, img: './PNGFILE/peanut sarap.png', title: 'Peanut Sarap', desc: 'Product packaging and marketing design for local snack brand.', link: './dsfgh.html' },
-  { id: 8, img: './PNGFILE/ginatang kuhol.png', title: 'Ginatang Kuhol', desc: 'Food photography and visual design for local delicacy.', link: './dsfgh.html' },
-  { id: 9, img: './PNGFILE/PROJECT9.jpg', title: 'Project 9', desc: 'Description for project 9 goes here.', link: './dsfgh.html' },
-  { id: 10, img: './PNGFILE/MILKTEA 3.jpg', title: 'Milk Tea Campaign', desc: 'Marketing visuals and promotional design for milk tea brand.', link: './dsfgh.html' },
+const brandingServices = [
+  ["Brand Identity", "Posters"],
+  ["Brand Moodboard", "Billboard"],
+  ["Logo & Application", "Publications"],
+  ["Business Card", "Menu Board"],
+  ["Letterhead", "Handheld Menu"],
+  ["Company Profile", "Invitation"],
+  ["Brochure", "Wall Mural"],
+  ["Flyer", "Illustration"],
+  ["Catalogue", "Packaging Design"],
+  ["Banners", "& More"],
 ];
 
-function useTypingEffect(words) {
-  const [text, setText] = useState('');
-  const [wordIdx, setWordIdx] = useState(0);
-  const [charIdx, setCharIdx] = useState(0);
-  const [deleting, setDeleting] = useState(false);
+const webServices = [
+  ["Web Design", "Online Listings"],
+  ["Web Devt", "S.E.O."],
+  ["Sitemap & Strategy", "FB Ads"],
+  ["FB Site Design", "Google Ads"],
+  ["Social Media Post", "Newsletter Design"],
+  ["Banner Ads", "Email Web Blast"],
+];
 
-  useEffect(() => {
-    const current = words[wordIdx];
-    let timeout;
-    
-    if (!deleting && charIdx === current.length) {
-      timeout = setTimeout(() => setDeleting(true), 2000);
-    } else if (deleting && charIdx === 0) {
-      setDeleting(false);
-      setWordIdx((i) => (i + 1) % words.length);
-    } else {
-      const next = deleting ? charIdx - 1 : charIdx + 1;
-      timeout = setTimeout(() => {
-        setText(current.substring(0, next));
-        setCharIdx(next);
-      }, deleting ? 50 : 100);
-    }
-    
-    return () => clearTimeout(timeout);
-  }, [charIdx, deleting, wordIdx, words]);
+const otherServices = [
+  ["Interior Look & Feel", "Outdoor Photography"],
+  ["Signage Design", "Studio Photography"],
+  ["Construction Support", "AVP Presentations"],
+  ["Booth Design", "Video Editing"],
+  ["Food Photography", "3D Modeling"],
+  ["Indoor Photography", "3D Animation"],
+];
 
-  return text;
-}
+const CheckIcon = () => (
+  <span
+    style={{
+      display: "inline-block",
+      width: 10,
+      height: 10,
+      background: "#00bcd4",
+      marginRight: 10,
+      flexShrink: 0,
+      marginTop: 4,
+    }}
+  />
+);
 
-function Modal({ project, onClose }) {
-  if (!project) return null;
-  
-  return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal-content-box">
-        <button className="modal-close-btn" onClick={onClose}>×</button>
-        <img 
-          className="modal-img" 
-          src={project.img || 'https://via.placeholder.com/800x500?text=No+Image'} 
-          alt={project.title} 
-        />
-        <h2 style={{ marginBottom: '12px', color: '#3391ff' }}>{project.title}</h2>
-        <p style={{ color: '#ccc', marginBottom: '20px', lineHeight: 1.6 }}>{project.desc}</p>
-        <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-          <a href={project.link} target="_blank" rel="noreferrer" className="btn-blue">View More</a>
-          <a href={project.link} target="_blank" rel="noreferrer" className="btn-outline-blue">Full Project</a>
+const ServiceList = ({ pairs }) => (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "6px 16px",
+      marginTop: 12,
+    }}
+  >
+    {pairs.map(([a, b], i) => (
+      <>
+        <div key={`a-${i}`} style={{ display: "flex", alignItems: "flex-start", fontSize: 13.5, color: "#333" }}>
+          <CheckIcon />
+          {a}
         </div>
-      </div>
-    </div>
-  );
-}
+        <div key={`b-${i}`} style={{ display: "flex", alignItems: "flex-start", fontSize: 13.5, color: "#333" }}>
+          <CheckIcon />
+          {b}
+        </div>
+      </>
+    ))}
+  </div>
+);
 
-function MobileNav({ open, onClose, navigate }) {
-  if (!open) return null;
-  
-  const go = (page) => {
-    navigate(page);
-    onClose();
-  };
-  
+const serviceImages = {
+  branding: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80",
+  web: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&q=80",
+  other: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80",
+};
+
+export default function ServicesPage() {
+  const [imgErrors, setImgErrors] = useState({});
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      background: '#0a0a0a',
-      zIndex: 9999,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      <button
-        onClick={onClose}
+    <div style={{ fontFamily: "'Segoe UI', sans-serif", margin: 0, padding: 0 }}>
+
+      {/* ── HERO SECTION ── */}
+      <section
         style={{
-          position: 'absolute',
-          top: '20px',
-          right: '30px',
-          fontSize: '2.5rem',
-          cursor: 'pointer',
-          color: '#3391ff',
-          background: 'none',
-          border: 'none',
+          background: "#00bcd4",
+          padding: "60px 80px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          minHeight: 340,
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        ×
-      </button>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '25px' }}>
-        {['about', 'experience', 'gallery', 'testimonials', 'contact', 'portfolio'].map((page) => (
-          <button
-            key={page}
-            onClick={() => go(page)}
+        {/* Left content */}
+        <div style={{ maxWidth: 520, zIndex: 2, position: "relative" }}>
+          <p
             style={{
-              fontSize: '1.5rem',
-              color: '#3391ff',
-              fontWeight: '600',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              textTransform: 'capitalize',
-              transition: 'color 0.3s',
-            }}
-            onMouseEnter={(e) => (e.target.style.color = '#fff')}
-            onMouseLeave={(e) => (e.target.style.color = '#3391ff')}
-          >
-            {page.charAt(0).toUpperCase() + page.slice(1)}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Navbar({ currentPage, navigate }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const NAV_LINKS = ['about', 'experience', 'gallery', 'testimonials', 'contact', 'portfolio'];
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  return (
-    <>
-      <header style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        width: '100%',
-        zIndex: 100,
-        background: scrolled ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: scrolled ? 'blur(10px)' : 'blur(5px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-        transition: 'all 0.3s ease',
-      }}>
-        <nav style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 5%',
-          height: '70px',
-          maxWidth: '1400px',
-          margin: '0 auto',
-        }}>
-          <button
-            onClick={() => navigate('home')}
-            style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: '1.5rem',
-              fontWeight: 800,
-              color: '#3391ff',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
+              color: "#1a4a6b",
+              fontWeight: 700,
+              fontSize: 13,
+              letterSpacing: 2,
+              marginBottom: 12,
+              textTransform: "uppercase",
             }}
           >
-            MySite
-          </button>
-          
-          <div style={{ display: 'flex', gap: '35px', alignItems: 'center' }} className="desktop-nav">
-            {NAV_LINKS.map((link) => (
-              <button
-                key={link}
-                className="nav-link-item"
-                onClick={() => navigate(link)}
-                style={{ color: currentPage === link ? '#fff' : '#3391ff' }}
-              >
-                {link.charAt(0).toUpperCase() + link.slice(1)}
-              </button>
-            ))}
-          </div>
-          
-          <button
-            onClick={() => setMobileOpen(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '1.8rem',
-              color: '#3391ff',
-              display: 'none',
-            }}
-            className="hamburger"
-          >
-            ☰
-          </button>
-        </nav>
-      </header>
-      
-      <style>
-        {`
-          @media (max-width: 991px) {
-            .desktop-nav { display: none !important; }
-            .hamburger { display: block !important; }
-          }
-        `}
-      </style>
-      
-      <MobileNav open={mobileOpen} onClose={() => setMobileOpen(false)} navigate={navigate} />
-    </>
-  );
-}
-
-function AnimatedLetters({ text, baseDelay = 0, color }) {
-  return (
-    <>
-      {[...text].map((ch, i) => (
-        <span
-          key={i}
-          className="hero-letter"
-          style={{
-            animationDelay: `${baseDelay + i * 0.05}s`,
-            color: color || 'inherit',
-          }}
-        >
-          {ch === ' ' ? '\u00a0' : ch}
-        </span>
-      ))}
-    </>
-  );
-}
-
-function AnimatedWords({ text, baseDelay = 0 }) {
-  return (
-    <>
-      {text.split(' ').map((word, i) => (
-        <span
-          key={i}
-          className="hero-sub-word"
-          style={{ animationDelay: `${baseDelay + i * 0.07}s` }}
-        >
-          {word}
-        </span>
-      ))}
-    </>
-  );
-}
-
-function Home({ navigate }) {
-  const typed = useTypingEffect(['UI/UX Designer', 'Photo Retoucher', 'Marketing Artist']);
-  const [activeModal, setActiveModal] = useState(null);
-  const videoRef = useRef(null);
-  const [videoError, setVideoError] = useState(false);
-
-  // Initialize video for full screen playback
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.muted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.setAttribute('playsinline', 'true');
-
-    const attemptPlay = async () => {
-      try {
-        await video.play();
-      } catch (err) {
-        console.log('Auto-play prevented:', err);
-        setVideoError(true);
-        // Try to play on user interaction
-        const playOnInteraction = () => {
-          video.play().catch(e => console.log('Still failed:', e));
-          document.removeEventListener('click', playOnInteraction);
-          document.removeEventListener('touchstart', playOnInteraction);
-          document.removeEventListener('scroll', playOnInteraction);
-        };
-        document.addEventListener('click', playOnInteraction);
-        document.addEventListener('touchstart', playOnInteraction);
-        document.addEventListener('scroll', playOnInteraction);
-      }
-    };
-
-    const handleError = () => {
-      console.error('Video failed to load');
-      setVideoError(true);
-    };
-    
-    video.addEventListener('error', handleError);
-    
-    // Small delay to ensure video is ready
-    const timer = setTimeout(attemptPlay, 100);
-
-    return () => {
-      clearTimeout(timer);
-      video.removeEventListener('error', handleError);
-      if (video) {
-        video.pause();
-      }
-    };
-  }, []);
-
-  const titleEndDelay = 0.3 + ('I Am a'.length - 1) * 0.05 + 0.3;
-  const subDelay = titleEndDelay + 0.2;
-
-  return (
-    <div style={{ background: '#000', color: '#fff' }}>
-      
-      {/* HERO SECTION - FULL SCREEN VIDEO WITH NO BLACK BARS */}
-      <div className="hero-section">
-        
-        {/* Video Container - fills entire screen */}
-        <div className="hero-video-container">
-          {!videoError ? (
-            <video
-              ref={videoRef}
-              className="hero-video"
-              autoPlay
-              muted
-              loop
-              playsInline
-            >
-              <source src={heroVideo} type="video/mp4" />
-            </video>
-          ) : (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: 'linear-gradient(135deg, #0a0a2a 0%, #000 100%)',
-            }} />
-          )}
-        </div>
-        
-        {/* Dark Overlay for better text readability */}
-        <div className="hero-overlay" />
-        
-        {/* Content */}
-        <div className="hero-content">
-          <div style={{ maxWidth: '800px', width: '90%' }}>
-            <h3 style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: '1rem',
-              color: '#3391ff',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              marginBottom: '20px',
-              opacity: 0,
-              animation: 'fadeUp 0.6s ease forwards',
-              animationDelay: '0.1s',
-            }}>
-              HI THERE! 👋
-            </h3>
-            
-            <h1 className="hero-title" style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-              fontWeight: 800,
-              lineHeight: 1.1,
-              color: '#fff',
-              marginBottom: '15px',
-            }}>
-              <AnimatedLetters text="I Am a" baseDelay={0.3} color="#fff" />
-            </h1>
-            
-            <div className="hero-typed" style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: 'clamp(2rem, 4.5vw, 3.5rem)',
-              fontWeight: 800,
-              color: '#3391ff',
-              marginBottom: '30px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '5px',
-              opacity: 0,
-              animation: 'fadeUp 0.5s ease forwards',
-              animationDelay: `${titleEndDelay}s`,
-            }}>
-              <span>{typed}</span>
-              <span className="cursor-blink" style={{
-                display: 'inline-block',
-                width: '3px',
-                height: '1em',
-                background: '#3391ff',
-              }} />
-            </div>
-            
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-              lineHeight: 1.7,
-              maxWidth: '550px',
-              margin: '0 auto 40px',
-            }}>
-              <AnimatedWords
-                text="Creative web developer & graphic designer from the Philippines. I craft beautiful visuals and responsive digital experiences."
-                baseDelay={subDelay}
-              />
-            </p>
-            
-            <div style={{
-              display: 'flex',
-              gap: '20px',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              opacity: 0,
-              animation: 'fadeUp 0.6s ease forwards',
-              animationDelay: `${subDelay + 1.2}s`,
-            }}>
-              <button className="btn-blue" onClick={() => navigate('about')}>
-                About Me 👤
-              </button>
-              <button className="btn-outline-blue" onClick={() => navigate('portfolio')}>
-                View My Work
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        {/* Scroll Indicator */}
-        <div className="scroll-indicator">
-          <span>SCROLL</span>
-          <div className="scroll-indicator-line" />
-        </div>
-      </div>
-      
-      {/* ABOUT SECTION */}
-      <section style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        width: '100%',
-        minHeight: '100vh',
-      }}>
-        <div style={{
-          flex: 1,
-          minWidth: '300px',
-          minHeight: '500px',
-          background: "url('./PNGFILE/profile.jpg') no-repeat center center / cover",
-        }} />
-        <div style={{
-          flex: 1,
-          minWidth: '300px',
-          background: '#111',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          padding: '60px',
-        }}>
-          <h1 style={{
-            fontFamily: "'Syne', sans-serif",
-            fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-            fontWeight: 800,
-            color: '#3391ff',
-            marginBottom: '20px',
-          }}>
-            About Me
-          </h1>
-          <div style={{
-            width: '60px',
-            height: '3px',
-            background: '#3391ff',
-            marginBottom: '30px',
-          }} />
-          <p style={{
-            fontSize: '1rem',
-            lineHeight: 1.7,
-            color: '#ccc',
-            marginBottom: '30px',
-          }}>
-            I'm Nathaniel Tolentino Oliver II, a creative web developer and designer from the Philippines.
-            With a strong eye for design and a passion for coding, I specialize in building responsive,
-            modern websites and web applications that leave a lasting impression.
+            OUR SERVICES
           </p>
-          <ul style={{
-            listStyle: 'none',
-            marginBottom: '40px',
-          }}>
-            <li style={{ marginBottom: '12px', color: '#ccc' }}>
-              <strong style={{ color: '#3391ff' }}>📍 Location:</strong> Magsingal, Ilocos Sur, Philippines
-            </li>
-            <li style={{ marginBottom: '12px', color: '#ccc' }}>
-              <strong style={{ color: '#3391ff' }}>📧 Email:</strong> nathaniel@example.com
-            </li>
-            <li style={{ marginBottom: '12px', color: '#ccc' }}>
-              <strong style={{ color: '#3391ff' }}>📱 Phone:</strong> +63 XXX XXX XXXX
-            </li>
-            <li style={{ color: '#ccc' }}>
-              <strong style={{ color: '#3391ff' }}>⚡ Skills:</strong> HTML, CSS, JS, React, Photoshop, Lightroom
-            </li>
-          </ul>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
-            <button className="btn-outline-blue" onClick={() => navigate('portfolio')}>
-              Explore My Work
-            </button>
-            <a href="./Nathaniel_Oliver_CV.pdf" target="_blank" rel="noreferrer" className="btn-blue">
-              Download CV 📄
-            </a>
-          </div>
-        </div>
-      </section>
-      
-      {/* FEATURED PROJECTS */}
-      <section style={{ padding: '80px 20px', background: '#000' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <h2 style={{
-            textAlign: 'center',
-            fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-            marginBottom: '50px',
-            color: '#fff',
-            fontFamily: "'Syne', sans-serif",
-            fontWeight: 800,
-          }}>
-            Featured Portfolio Projects
-          </h2>
-          
-          <div className="projects-grid" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '25px',
-          }}>
-            {PROJECTS.map((project) => (
-              <div
-                key={project.id}
-                className="project-card"
-                onClick={() => setActiveModal(project)}
+          <h1
+            style={{
+              color: "#fff",
+              fontSize: "clamp(28px, 4vw, 42px)",
+              fontWeight: 700,
+              lineHeight: 1.2,
+              marginBottom: 28,
+              margin: "0 0 28px 0",
+            }}
+          >
+            Top Agency Quality at only the<br />Fraction of the price
+          </h1>
+          <ul style={{ listStyle: "none", padding: 0, margin: "0 0 32px 0" }}>
+            {[
+              "High Caliber Professional Branding & Applications",
+              "Marketing Strategy & Marketing Collaterals",
+              "Website Design, Development, & Custom Features",
+              "Complete Branding of Print, Web, Interior, and More",
+            ].map((item, i) => (
+              <li
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  color: "#fff",
+                  fontSize: 15,
+                  marginBottom: 10,
+                }}
               >
-                <img
-                  src={project.img || 'https://via.placeholder.com/400x300?text=Project+Image'}
-                  alt={project.title}
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 11,
+                    height: 11,
+                    background: "#1a4a6b",
+                    marginRight: 12,
+                    flexShrink: 0,
+                    marginTop: 4,
                   }}
                 />
-                <div style={{ padding: '20px' }}>
-                  <h3 style={{ color: '#fff', marginBottom: '8px', fontSize: '1.1rem' }}>
-                    {project.title}
-                  </h3>
-                  <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '15px', lineHeight: 1.5 }}>
-                    {project.desc}
-                  </p>
-                  <div className="project-card-button">
-                    View Details →
-                  </div>
-                </div>
-              </div>
+                {item}
+              </li>
             ))}
+          </ul>
+          <a
+            href="#inquiry"
+            style={{
+              display: "inline-block",
+              background: "#1a4a6b",
+              color: "#fff",
+              padding: "12px 28px",
+              fontWeight: 700,
+              fontSize: 13,
+              letterSpacing: 1.5,
+              textDecoration: "none",
+              textTransform: "uppercase",
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={e => (e.target.style.background = "#0d3354")}
+            onMouseLeave={e => (e.target.style.background = "#1a4a6b")}
+          >
+            MAKE AN INQUIRY
+          </a>
+        </div>
+
+        {/* Decorative surfer graphic (SVG stand-in) */}
+        <div
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            width: "50%",
+            height: "100%",
+            opacity: 0.18,
+            background:
+              "radial-gradient(ellipse at 70% 40%, #fff 0%, transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            width: 340,
+            height: 280,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* Abstract surfer shape using layered divs */}
+          <svg
+            viewBox="0 0 320 280"
+            width="320"
+            height="280"
+            style={{ opacity: 0.85 }}
+          >
+            <ellipse cx="200" cy="140" rx="130" ry="130" fill="rgba(255,255,255,0.08)" />
+            <ellipse cx="200" cy="140" rx="90" ry="90" fill="rgba(255,255,255,0.06)" />
+            {/* Wave shapes */}
+            <path
+              d="M60,180 Q120,100 200,140 Q260,170 290,120"
+              stroke="rgba(255,255,255,0.5)"
+              strokeWidth="3"
+              fill="none"
+            />
+            <path
+              d="M40,200 Q110,120 210,155 Q270,185 300,135"
+              stroke="rgba(255,255,255,0.3)"
+              strokeWidth="2"
+              fill="none"
+            />
+            {/* Abstract figure */}
+            <circle cx="205" cy="95" r="14" fill="rgba(255,255,255,0.7)" />
+            <path
+              d="M205,109 L195,155 L220,170 L210,195"
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth="4"
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path
+              d="M200,125 L175,145 M200,125 L225,142"
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth="4"
+              fill="none"
+              strokeLinecap="round"
+            />
+            {/* Diagonal slashes */}
+            <line x1="80" y1="60" x2="160" y2="200" stroke="rgba(255,255,255,0.2)" strokeWidth="8" />
+            <line x1="110" y1="40" x2="170" y2="180" stroke="rgba(255,255,255,0.12)" strokeWidth="5" />
+            <line x1="240" y1="50" x2="300" y2="220" stroke="rgba(255,255,255,0.15)" strokeWidth="6" />
+          </svg>
+        </div>
+      </section>
+
+      {/* ── SERVICE CARDS ── */}
+      <section style={{ background: "#f4f4f4", padding: "0 60px 60px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 0,
+            maxWidth: 1100,
+            margin: "0 auto",
+          }}
+        >
+          {/* Card: Branding */}
+          <div style={{ background: "#fff", borderRadius: 0, overflow: "hidden", border: "1px solid #e8e8e8" }}>
+            <div style={{ height: 200, overflow: "hidden", background: "#222" }}>
+              <img
+                src={serviceImages.branding}
+                alt="Branding Services"
+                style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
+                onError={() => setImgErrors(e => ({ ...e, branding: true }))}
+              />
+            </div>
+            <div style={{ padding: "28px 28px 32px" }}>
+              <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1a1a1a", marginBottom: 12 }}>
+                Branding Services
+              </h3>
+              <p style={{ color: "#00bcd4", fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
+                We create brand identity that effectively communicates with our client's goals, target market, and strategy.
+              </p>
+              <ServiceList pairs={brandingServices} />
+            </div>
           </div>
-          
-          <div style={{ textAlign: 'center', marginTop: '50px' }}>
-            <button className="btn-blue" onClick={() => navigate('portfolio')}>
-              View All Projects
-            </button>
+
+          {/* Card: Web & Online */}
+          <div style={{ background: "#fff", borderRadius: 0, overflow: "hidden", border: "1px solid #e8e8e8", borderLeft: "none", borderRight: "none" }}>
+            <div style={{ height: 200, overflow: "hidden", background: "#1a3a5c" }}>
+              <img
+                src={serviceImages.web}
+                alt="Web & Online"
+                style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }}
+                onError={() => setImgErrors(e => ({ ...e, web: true }))}
+              />
+            </div>
+            <div style={{ padding: "28px 28px 32px" }}>
+              <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1a1a1a", marginBottom: 12 }}>
+                Web & Online
+              </h3>
+              <p style={{ color: "#00bcd4", fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
+                Each website we create aims to communicate our client's message while captivating their visitor to get interested in availing products and services.
+              </p>
+              <ServiceList pairs={webServices} />
+            </div>
+          </div>
+
+          {/* Card: Other Services */}
+          <div style={{ background: "#fff", borderRadius: 0, overflow: "hidden", border: "1px solid #e8e8e8" }}>
+            <div style={{ height: 200, overflow: "hidden", background: "#3a3a2a" }}>
+              <img
+                src={serviceImages.other}
+                alt="Other Services"
+                style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }}
+                onError={() => setImgErrors(e => ({ ...e, other: true }))}
+              />
+            </div>
+            <div style={{ padding: "28px 28px 32px" }}>
+              <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1a1a1a", marginBottom: 12 }}>
+                Other Services
+              </h3>
+              <p style={{ color: "#00bcd4", fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
+                We specialize in doing any multimedia creative work and strategy that our clients need for branding. Don't hesitate to ask or inquire.
+              </p>
+              <ServiceList pairs={otherServices} />
+            </div>
           </div>
         </div>
       </section>
-      
-      <Modal project={activeModal} onClose={() => setActiveModal(null)} />
-      
-      {/* Scroll to Top Button */}
-      <button
-        id="scroll-top-btn"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+
+      {/* ── CTA BANNER ── */}
+      <section
+        style={{
+          background: "#00bcd4",
+          padding: "22px 60px",
+          textAlign: "center",
+        }}
       >
-        ↑
-      </button>
-    </div>
-  );
-}
-
-export default function App() {
-  const [page, setPage] = useState('home');
-
-  const navigate = (pageId) => {
-    setPage(pageId);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const renderPage = () => {
-    switch (page) {
-      case 'home':
-        return <Home navigate={navigate} />;
-      case 'about':
-        return <About navigate={navigate} />;
-      case 'experience':
-        return <Experience />;
-      case 'gallery':
-        return <Gallery />;
-      case 'testimonials':
-        return <Testimonials />;
-      case 'contact':
-        return <Contact />;
-      case 'portfolio':
-        return <Portfolio />;
-      default:
-        return <Home navigate={navigate} />;
-    }
-  };
-
-  return (
-    <div style={{
-      background: '#000',
-      minHeight: '100vh',
-      width: '100%',
-      overflowX: 'hidden',
-    }}>
-      <style>{GLOBAL_STYLES}</style>
-      <Navbar currentPage={page} navigate={navigate} />
-      <main key={page}>{renderPage()}</main>
-      <footer style={{
-        padding: '40px 5%',
-        background: '#030305',
-        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-        textAlign: 'center',
-      }}>
-        <p style={{ color: '#666', fontSize: '0.85rem' }}>
-          © {new Date().getFullYear()} Nathaniel Oliver — All rights reserved.
+        <p style={{ color: "#fff", fontWeight: 700, fontSize: 18, margin: 0 }}>
+          Contact us now to get a FREE Consultation and Project Estimate
         </p>
-      </footer>
+      </section>
+
+      {/* ── BRAND STATEMENT SECTION ── */}
+      <section
+        style={{
+          position: "relative",
+          minHeight: 280,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+          background: "#0d2d4a",
+        }}
+      >
+        {/* Tiled background brand imagery overlay */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "repeating-linear-gradient(90deg, rgba(0,188,212,0.07) 0px, rgba(0,188,212,0.07) 1px, transparent 1px, transparent 80px), repeating-linear-gradient(0deg, rgba(0,188,212,0.07) 0px, rgba(0,188,212,0.07) 1px, transparent 1px, transparent 80px)",
+            zIndex: 1,
+          }}
+        />
+        {/* Ghosted brand name repeated */}
+        {["left", "center", "right"].map((pos, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: pos === "left" ? "5%" : pos === "center" ? "50%" : "auto",
+              right: pos === "right" ? "5%" : "auto",
+              transform: "translateY(-50%)",
+              opacity: 0.07,
+              fontSize: 52,
+              fontWeight: 900,
+              color: "#00bcd4",
+              letterSpacing: 4,
+              whiteSpace: "nowrap",
+              userSelect: "none",
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          >
+            WESTWOOD
+          </div>
+        ))}
+
+        {/* Content */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            maxWidth: 820,
+            textAlign: "center",
+            padding: "50px 40px",
+          }}
+        >
+          <p
+            style={{
+              color: "#00bcd4",
+              fontWeight: 700,
+              fontSize: "clamp(14px, 2vw, 18px)",
+              lineHeight: 1.7,
+              marginBottom: 20,
+            }}
+          >
+            We know how to guide SME & Corporate brands through the delicate process of reinvigorating
+            their passion and how they communicate it through visual and aural touch points. We help
+            traverse potential negative pushback from current brand fans while accentuating the potential
+            for success. That's what you get when working with us.
+          </p>
+          <p style={{ color: "#ccc", fontSize: 14, marginBottom: 28 }}>
+            Don't spend on designers that don't work or understand what your business needs.
+          </p>
+          <a
+            id="inquiry"
+            href="mailto:inquiry@example.com"
+            style={{
+              display: "inline-block",
+              background: "#00bcd4",
+              color: "#fff",
+              padding: "14px 36px",
+              fontWeight: 700,
+              fontSize: 13,
+              letterSpacing: 2,
+              textDecoration: "none",
+              textTransform: "uppercase",
+              transition: "background 0.2s, transform 0.2s",
+            }}
+            onMouseEnter={e => {
+              e.target.style.background = "#00a3b8";
+              e.target.style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={e => {
+              e.target.style.background = "#00bcd4";
+              e.target.style.transform = "translateY(0)";
+            }}
+          >
+            MAKE AN INQUIRY
+          </a>
+        </div>
+      </section>
     </div>
   );
 }
