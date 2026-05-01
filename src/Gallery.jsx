@@ -22,6 +22,18 @@ const OTHER_ITEMS = [
   "Food Photography","3D Modeling","Indoor Photography","3D Animation",
 ];
 
+const REPAIR_ITEMS = [
+  "Electronics Repair","Appliance Repair","Phone & Tablet Repair","Laptop Repair",
+  "Gadget Troubleshooting","Screen Replacement","Battery Replacement","Water Damage Repair",
+  "Hardware Upgrade","Software Installation","Data Recovery","Preventive Maintenance",
+];
+
+const VIDEO_ITEMS = [
+  "Corporate Video","Social Media Reels","Product Demo Video","Event Coverage",
+  "Motion Graphics","Animation Video","Documentary","YouTube Production",
+  "Video Ads","Drone Footage","Post-Production","Color Grading",
+];
+
 const toPairs = (arr) => {
   const pairs = [];
   for (let i = 0; i < arr.length; i += 2) pairs.push([arr[i], arr[i + 1]]);
@@ -32,9 +44,11 @@ const serviceImages = {
   branding: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80",
   web: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&q=80",
   other: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80",
+  repair: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=600&q=80",
+  video: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&q=80",
 };
 
-const SERVICE_CATEGORIES = ["Branding", "Web & Online", "Other Services"];
+const SERVICE_CATEGORIES = ["Branding", "Web & Online", "Other Services", "Repair Services", "Video Editing"];
 
 // ─── SMALL COMPONENTS ───────────────────────────────────────────────────────
 
@@ -219,10 +233,26 @@ ${form.name}`;
               </div>
 
               {/* Other */}
-              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px" }}>
+              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
                 <p style={{ color:"#00bcd4", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🎨 Other Service Items</p>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
                   {OTHER_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
+                </div>
+              </div>
+
+              {/* Repair */}
+              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
+                <p style={{ color:"#2ecc71", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🔧 Repair Service Items</p>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
+                  {REPAIR_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
+                </div>
+              </div>
+
+              {/* Video */}
+              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px" }}>
+                <p style={{ color:"#e74c8b", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🎬 Video Editing Items</p>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
+                  {VIDEO_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
                 </div>
               </div>
             </div>
@@ -456,8 +486,9 @@ export default function ServicesPage() {
 
       {/* ── SERVICE CARDS ── */}
       <section style={{ background:"#f4f4f4", padding:"0 60px 60px" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:0, maxWidth:1100, margin:"0 auto" }}>
 
+        {/* Row 1: 3 cards */}
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:0, maxWidth:1100, margin:"0 auto" }}>
           {[
             { key:"branding", img:serviceImages.branding, bg:"#222", title:"Branding Services", desc:"We create brand identity that effectively communicates with our client's goals, target market, and strategy.", items:BRANDING_ITEMS, cat:"Branding", border:"1px solid #e8e8e8" },
             { key:"web", img:serviceImages.web, bg:"#1a3a5c", title:"Web & Online", desc:"Each website we create aims to communicate our client's message while captivating their visitor to get interested in availing products and services.", items:WEB_ITEMS, cat:"Web & Online", border:"1px solid #e8e8e8", borderL:"none", borderR:"none" },
@@ -469,6 +500,31 @@ export default function ServicesPage() {
               </div>
               <div style={{ padding:"28px 28px 32px" }}>
                 <h3 style={{ fontSize:22, fontWeight:700, color:"#1a1a1a", marginBottom:12 }}>{title}</h3>
+                <p style={{ color:"#00bcd4", fontSize:14, lineHeight:1.6, marginBottom:16 }}>{desc}</p>
+                <ServiceList items={items} />
+                <InquireBtn onClick={() => openModal(cat)} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Row 2: 2 new cards — centered */}
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:0, maxWidth: 734, margin:"0 auto" }}>
+          {[
+            { key:"repair", img:serviceImages.repair, bg:"#1a2a1a", title:"Repair Services", desc:"We provide fast, reliable repair solutions for your electronics, gadgets, and devices. From screen fixes to full hardware overhauls — we've got you covered.", items:REPAIR_ITEMS, cat:"Repair Services", accent:"#2ecc71" },
+            { key:"video", img:serviceImages.video, bg:"#1a1a3a", title:"Video Editing", desc:"We craft compelling video content that tells your brand's story. From corporate films to social reels — professional editing that captivates your audience.", items:VIDEO_ITEMS, cat:"Video Editing", accent:"#e74c8b" },
+          ].map(({ key, img, bg, title, desc, items, cat, accent }) => (
+            <div key={key} style={{ background:"#fff", overflow:"hidden", border:"1px solid #e8e8e8", borderTop:"none", position:"relative" }}>
+              {/* Accent top bar */}
+              <div style={{ height:4, background:`linear-gradient(90deg, ${accent}, #00bcd4)`, position:"absolute", top:0, left:0, right:0, zIndex:1 }} />
+              <div style={{ height:200, overflow:"hidden", background:bg }}>
+                <img src={img} alt={title} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:0.9 }} />
+              </div>
+              <div style={{ padding:"28px 28px 32px" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+                  <span style={{ display:"inline-block", width:4, height:24, background:`linear-gradient(to bottom, ${accent}, #00bcd4)`, borderRadius:2 }} />
+                  <h3 style={{ fontSize:22, fontWeight:700, color:"#1a1a1a", margin:0 }}>{title}</h3>
+                </div>
                 <p style={{ color:"#00bcd4", fontSize:14, lineHeight:1.6, marginBottom:16 }}>{desc}</p>
                 <ServiceList items={items} />
                 <InquireBtn onClick={() => openModal(cat)} />
