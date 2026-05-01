@@ -43,12 +43,6 @@ const PHOTO_EDITING_ITEMS = [
   "HDR Editing","Composite Editing","Product Photo Edit","Batch Editing",
 ];
 
-const toPairs = (arr) => {
-  const pairs = [];
-  for (let i = 0; i < arr.length; i += 2) pairs.push([arr[i], arr[i + 1]]);
-  return pairs;
-};
-
 const serviceImages = {
   branding: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80",
   web: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&q=80",
@@ -60,38 +54,188 @@ const serviceImages = {
 
 const SERVICE_CATEGORIES = ["Branding", "Web & Online", "Other Services", "Repair Services", "Video Editing", "Photo Editing"];
 
+// ─── RESPONSIVE STYLES ──────────────────────────────────────────────────────
+
+const styles = `
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .services-page { font-family: 'Segoe UI', sans-serif; }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative; overflow: hidden; min-height: 480px;
+    display: flex; align-items: center; background: #0a1628;
+  }
+  .hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg,#0a1628 0%,#0d2a3a 40%,#003d4d 100%); z-index: 0; }
+  .hero-glow1 { position: absolute; top: -80px; right: -60px; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle,rgba(0,188,212,0.18) 0%,transparent 70%); z-index: 0; }
+  .hero-glow2 { position: absolute; bottom: -100px; left: 30%; width: 350px; height: 350px; border-radius: 50%; background: radial-gradient(circle,rgba(0,188,212,0.10) 0%,transparent 70%); z-index: 0; }
+  .hero-grid { position: absolute; inset: 0; background-image: repeating-linear-gradient(120deg,transparent,transparent 60px,rgba(0,188,212,0.03) 60px,rgba(0,188,212,0.03) 61px); z-index: 0; }
+  .hero-stripe { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: linear-gradient(to bottom,#00bcd4,#0097a7,transparent); z-index: 2; }
+  .hero-inner {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 70px 80px; gap: 40px;
+  }
+  .hero-content { max-width: 560px; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+  .hero-eyebrow-line { display: inline-block; width: 48px; height: 3px; border-radius: 2px; }
+  .hero-eyebrow-text { color: #00e5ff; font-weight: 900; font-size: 20px; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 20px rgba(0,229,255,0.45); }
+  .hero-title { margin-bottom: 10px; line-height: 1.05; }
+  .hero-title-white { display: block; color: #fff; font-size: clamp(28px,4.5vw,54px); font-weight: 800; letter-spacing: -1px; }
+  .hero-title-grad { display: block; font-size: clamp(28px,4.5vw,54px); font-weight: 900; letter-spacing: -1px; background: linear-gradient(90deg,#00e5ff,#00bcd4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-divider { width: 60px; height: 3px; background: linear-gradient(90deg,#00bcd4,transparent); margin: 22px 0 24px; border-radius: 2px; }
+  .hero-list { list-style: none; margin-bottom: 36px; }
+  .hero-list li { display: flex; align-items: center; color: rgba(255,255,255,0.85); font-size: 15px; margin-bottom: 12px; gap: 14px; }
+  .hero-list-dot { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(0,188,212,0.6); flex-shrink: 0; }
+  .hero-list-inner { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #00bcd4; }
+  .hero-cta { position: relative; overflow: hidden; background: linear-gradient(90deg,#00bcd4,#0097a7); color: #fff; border: none; padding: 15px 40px; font-weight: 800; font-size: 13px; letter-spacing: 2.5px; text-transform: uppercase; cursor: pointer; border-radius: 2px; box-shadow: 0 8px 32px rgba(0,188,212,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,188,212,0.5); }
+  .hero-visual { position: relative; flex-shrink: 0; width: 360px; height: 360px; }
+  .hero-wave { position: absolute; bottom: 0; left: 0; right: 0; z-index: 1; }
+
+  /* ── Service Cards ── */
+  .cards-section { background: #f4f4f4; padding: 0 60px 60px; }
+  .cards-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; max-width: 1100px; margin: 0 auto; }
+  .card { background: #fff; overflow: hidden; border: 1px solid #e8e8e8; position: relative; }
+  .card-img-wrap { height: 200px; overflow: hidden; }
+  .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+  .card-body { padding: 28px 28px 32px; }
+  .card-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; }
+  .card-desc { color: #00bcd4; font-size: 14px; line-height: 1.6; margin-bottom: 16px; }
+  .card-accent-bar { height: 4px; position: absolute; top: 0; left: 0; right: 0; z-index: 1; }
+  .card-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .card-title-stripe { display: inline-block; width: 4px; height: 24px; border-radius: 2px; }
+
+  /* Service list */
+  .service-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; margin-top: 12px; }
+  .service-item { display: flex; align-items: flex-start; font-size: 13.5px; color: #333; }
+  .service-dot { display: inline-block; width: 10px; height: 10px; background: #00bcd4; margin-right: 10px; flex-shrink: 0; margin-top: 3px; }
+
+  /* Inquire btn */
+  .inquire-btn-wrap { margin-top: 24px; text-align: center; }
+  .inquire-btn { background: #00bcd4; color: #fff; border: none; padding: 11px 32px; font-weight: 700; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+  .inquire-btn:hover { background: #00a3b8; }
+
+  /* ── CTA Banner ── */
+  .cta-banner { background: #00bcd4; padding: 22px 60px; text-align: center; }
+  .cta-banner p { color: #fff; font-weight: 700; font-size: 18px; }
+
+  /* ── Brand Statement ── */
+  .brand-stmt { position: relative; min-height: 280px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #0d2d4a; }
+  .brand-grid-bg { position: absolute; inset: 0; background: repeating-linear-gradient(90deg,rgba(0,188,212,0.07) 0px,rgba(0,188,212,0.07) 1px,transparent 1px,transparent 80px),repeating-linear-gradient(0deg,rgba(0,188,212,0.07) 0px,rgba(0,188,212,0.07) 1px,transparent 1px,transparent 80px); z-index: 1; }
+  .brand-watermark { position: absolute; top: 50%; transform: translateY(-50%); opacity: 0.07; font-size: 52px; font-weight: 900; color: #00bcd4; letter-spacing: 4px; white-space: nowrap; user-select: none; pointer-events: none; z-index: 1; }
+  .brand-content { position: relative; z-index: 2; max-width: 820px; text-align: center; padding: 50px 40px; }
+  .brand-content p:first-child { color: #00bcd4; font-weight: 700; font-size: clamp(14px,2vw,18px); line-height: 1.7; margin-bottom: 20px; }
+  .brand-content p:nth-child(2) { color: #ccc; font-size: 14px; margin-bottom: 28px; }
+  .brand-btn { background: #00bcd4; color: #fff; border: none; padding: 14px 36px; font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+
+  /* ── Modal ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
+  .modal-box { background: #0f1624; border: 1px solid #1e3a5a; border-radius: 8px; width: 100%; max-width: 700px; max-height: 92vh; overflow: auto; position: relative; box-shadow: 0 24px 80px rgba(0,0,0,0.7); }
+  .modal-header { background: #00bcd4; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+  .modal-header-label { color: #0a3344; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  .modal-header-title { color: #fff; font-size: 20px; font-weight: 800; }
+  .modal-close { background: rgba(0,0,0,0.2); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+  .modal-body { padding: 24px 28px 32px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: #aaa; margin-bottom: 5px; display: block; letter-spacing: 0.5px; }
+  .form-input { width: 100%; padding: 10px 14px; background: #1a1a2e; border: 1px solid #2a3a5a; border-radius: 4px; color: #e0e0e0; font-size: 14px; outline: none; box-sizing: border-box; }
+  .form-input.error { border-color: #e74c3c; }
+  .form-error { color: #e74c3c; font-size: 11px; margin: 3px 0 0; }
+  .svc-check-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px 10px; }
+  .svc-section { background: #141c30; border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; }
+  .svc-section-title { font-size: 11.5px; font-weight: 700; margin: 0 0 10px; letter-spacing: 1px; text-transform: uppercase; }
+  .selected-summary { background: #071a0e; border: 1px solid #00bcd4; border-radius: 4px; padding: 10px 14px; margin: 16px 0 0; }
+  .selected-label { color: #00bcd4; font-size: 11px; font-weight: 700; margin: 0 0 5px; text-transform: uppercase; letter-spacing: 1px; }
+  .selected-items { color: #ccc; font-size: 12.5px; margin: 0; line-height: 1.7; }
+  .preview-btn { width: 100%; padding: 13px; background: #00bcd4; color: #fff; border: none; font-weight: 800; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 20px; }
+  .preview-btn:hover { background: #00a3b8; }
+  .email-preview-box { background: #141c30; border: 1px solid #2a3a5a; border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
+  .email-header { padding: 14px 18px; border-bottom: 1px solid #2a3a5a; }
+  .email-row { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 5px; }
+  .email-lbl { color: #888; font-size: 12px; width: 40px; flex-shrink: 0; }
+  .email-body-pre { margin: 0; padding: 18px; color: #ccc; font-size: 13px; line-height: 1.9; white-space: pre-wrap; font-family: 'Courier New', monospace; background: #0d1625; }
+  .attach-tips { background: #111c2e; border: 1px solid #1e3a2a; border-radius: 6px; padding: 14px 16px; margin-bottom: 20px; }
+  .attach-title { color: #00bcd4; font-weight: 700; font-size: 13px; margin: 0 0 10px; }
+  .tip-row { display: flex; gap: 10px; margin-bottom: 7px; align-items: flex-start; }
+  .tip-num { background: #00bcd4; color: #fff; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .tip-text { color: #aaa; font-size: 12.5px; line-height: 1.6; }
+  .modal-btns { display: flex; gap: 12px; }
+  .btn-edit { flex: 1; padding: 12px; background: transparent; border: 1px solid #2a3a5a; color: #aaa; font-weight: 700; font-size: 13px; cursor: pointer; letter-spacing: 1px; }
+  .btn-send { flex: 2; padding: 12px; background: #00bcd4; color: #fff; font-weight: 800; font-size: 13px; letter-spacing: 1.5px; text-decoration: none; text-transform: uppercase; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+  .btn-send:hover { background: #00a3b8; }
+  .cats-wrap { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+
+  /* ── RESPONSIVE ── */
+
+  /* Tablet: ≤ 900px */
+  @media (max-width: 900px) {
+    .hero-inner { flex-direction: column; padding: 50px 40px 60px; text-align: center; }
+    .hero-eyebrow { justify-content: center; }
+    .hero-list li { justify-content: center; }
+    .hero-visual { display: none; }
+    .hero-content { max-width: 100%; }
+    .cards-section { padding: 0 24px 40px; }
+    .cards-row { grid-template-columns: 1fr; }
+    .card { border-left: 1px solid #e8e8e8 !important; border-right: 1px solid #e8e8e8 !important; border-top: none; }
+    .card:first-child { border-top: 1px solid #e8e8e8 !important; }
+    .cta-banner { padding: 20px 24px; }
+    .brand-content { padding: 40px 24px; }
+    .svc-check-grid { grid-template-columns: repeat(2,1fr); }
+    .form-grid-2 { grid-template-columns: 1fr; }
+    .modal-body { padding: 20px 20px 28px; }
+    .modal-header { padding: 16px 20px; }
+  }
+
+  /* Mobile: ≤ 600px */
+  @media (max-width: 600px) {
+    .hero-inner { padding: 40px 20px 50px; }
+    .hero-eyebrow-text { font-size: 14px; letter-spacing: 3px; }
+    .hero-eyebrow-line { width: 28px; }
+    .hero-list { display: none; }
+    .hero-cta { padding: 14px 28px; font-size: 12px; letter-spacing: 1.5px; }
+    .cards-section { padding: 0 0 32px; }
+    .card { border-radius: 0; border-left: none !important; border-right: none !important; }
+    .card-body { padding: 20px 16px 24px; }
+    .card-title { font-size: 18px; }
+    .service-list { grid-template-columns: 1fr; }
+    .service-item { font-size: 13px; }
+    .cta-banner { padding: 18px 16px; }
+    .cta-banner p { font-size: 14px; }
+    .brand-content { padding: 32px 16px; }
+    .brand-watermark { display: none; }
+    .svc-check-grid { grid-template-columns: 1fr 1fr; }
+    .cats-wrap { gap: 8px; }
+    .modal-btns { flex-direction: column; }
+    .btn-send { flex: unset; }
+    .btn-edit { flex: unset; }
+    .modal-box { border-radius: 6px; }
+    .modal-header { padding: 14px 16px; }
+    .modal-header-title { font-size: 17px; }
+    .modal-body { padding: 16px 14px 24px; }
+    .email-body-pre { font-size: 11px; padding: 14px; }
+    .attach-tips { padding: 12px; }
+  }
+`;
+
 // ─── SMALL COMPONENTS ───────────────────────────────────────────────────────
 
 const ServiceList = ({ items }) => (
-  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px 16px", marginTop:12 }}>
-    {toPairs(items).map(([a, b]) =>
-      [a, b].map(item => item && (
-        <div key={item} style={{ display:"flex", alignItems:"flex-start", fontSize:13.5, color:"#333" }}>
-          <span style={{ display:"inline-block", width:10, height:10, background:"#00bcd4", marginRight:10, flexShrink:0, marginTop:3 }} />
-          {item}
-        </div>
-      ))
-    )}
+  <div className="service-list">
+    {items.map(item => (
+      <div key={item} className="service-item">
+        <span className="service-dot" />
+        {item}
+      </div>
+    ))}
   </div>
 );
 
-const InquireBtn = ({ onClick }) => {
-  const [hov, setHov] = useState(false);
-  return (
-    <div style={{ marginTop:24, textAlign:"center" }}>
-      <button
-        onClick={onClick}
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        style={{ background: hov ? "#00a3b8" : "#00bcd4", color:"#fff", border:"none", padding:"11px 32px", fontWeight:700, fontSize:13, letterSpacing:1.5, textTransform:"uppercase", cursor:"pointer", transition:"background 0.2s" }}
-      >
-        INQUIRE NOW
-      </button>
-    </div>
-  );
-};
-
-// ─── SERVICE CHECKBOX ───────────────────────────────────────────────────────
+const InquireBtn = ({ onClick }) => (
+  <div className="inquire-btn-wrap">
+    <button className="inquire-btn" onClick={onClick}>INQUIRE NOW</button>
+  </div>
+);
 
 const SvcCheck = ({ label, checked, onChange }) => (
   <label style={{ display:"flex", alignItems:"center", gap:7, cursor:"pointer", fontSize:12.5, color: checked ? "#00bcd4" : "#bbb", fontWeight: checked ? 700 : 400, userSelect:"none" }}>
@@ -103,21 +247,12 @@ const SvcCheck = ({ label, checked, onChange }) => (
 
 // ─── INQUIRY MODAL ──────────────────────────────────────────────────────────
 
-const INPUT = {
-  width:"100%", padding:"10px 14px", background:"#1a1a2e",
-  border:"1px solid #2a3a5a", borderRadius:4, color:"#e0e0e0",
-  fontSize:14, outline:"none", boxSizing:"border-box",
-};
-const LBL = { fontSize:12, color:"#aaa", marginBottom:5, display:"block", letterSpacing:0.5 };
-
 function InquiryModal({ open, onClose, defaultCategory }) {
   const [form, setForm] = useState({ name:"", email:"", phone:"", address:"", message:"" });
   const [selItems, setSelItems] = useState([]);
   const [selCats, setSelCats] = useState(defaultCategory ? [defaultCategory] : []);
   const [step, setStep] = useState("form");
   const [errors, setErrors] = useState({});
-
-  const prevOpen = useState(open)[0];
 
   const toggleItem = (item) => setSelItems(p => p.includes(item) ? p.filter(x => x !== item) : [...p, item]);
   const toggleCat = (cat) => setSelCats(p => p.includes(cat) ? p.filter(x => x !== cat) : [...p, cat]);
@@ -159,163 +294,117 @@ ${form.name}`;
   const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=Creationniel6@gmail.com&su=${encodeURIComponent("Service Inquiry — " + allSelected.slice(0,3).join(", "))}&body=${encodeURIComponent(emailBody)}`;
 
   return (
-    <div
-      onClick={e => e.target === e.currentTarget && onClose()}
-      style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.78)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:16, backdropFilter:"blur(4px)" }}
-    >
-      <div style={{ background:"#0f1624", border:"1px solid #1e3a5a", borderRadius:8, width:"100%", maxWidth:700, maxHeight:"92vh", overflow:"auto", position:"relative", boxShadow:"0 24px 80px rgba(0,0,0,0.7)" }}>
-
-        {/* Header */}
-        <div style={{ background:"#00bcd4", padding:"18px 28px", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, zIndex:10 }}>
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box">
+        <div className="modal-header">
           <div>
-            <p style={{ color:"#0a3344", fontSize:11, fontWeight:700, letterSpacing:2, margin:0, textTransform:"uppercase" }}>Get In Touch</p>
-            <h2 style={{ color:"#fff", margin:0, fontSize:20, fontWeight:800 }}>
-              {step === "form" ? "Make an Inquiry" : "Email Preview"}
-            </h2>
+            <p className="modal-header-label">Get In Touch</p>
+            <h2 className="modal-header-title">{step === "form" ? "Make an Inquiry" : "Email Preview"}</h2>
           </div>
-          <button onClick={onClose} style={{ background:"rgba(0,0,0,0.2)", border:"none", color:"#fff", width:32, height:32, borderRadius:"50%", cursor:"pointer", fontSize:20, lineHeight:1, display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
+          <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
         {step === "form" ? (
-          <div style={{ padding:"24px 28px 32px" }}>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:14 }}>
+          <div className="modal-body">
+            <div className="form-grid-2">
               <div>
-                <label style={LBL}>Name <span style={{ color:"#00bcd4" }}>*</span></label>
-                <input style={{ ...INPUT, borderColor: errors.name ? "#e74c3c" : "#2a3a5a" }} placeholder="Full name" value={form.name} onChange={e => setForm(f => ({ ...f, name:e.target.value }))} />
-                {errors.name && <p style={{ color:"#e74c3c", fontSize:11, margin:"3px 0 0" }}>{errors.name}</p>}
+                <label className="form-label">Name <span style={{ color:"#00bcd4" }}>*</span></label>
+                <input className={`form-input${errors.name ? " error" : ""}`} placeholder="Full name" value={form.name} onChange={e => setForm(f => ({ ...f, name:e.target.value }))} />
+                {errors.name && <p className="form-error">{errors.name}</p>}
               </div>
               <div>
-                <label style={LBL}>Email <span style={{ color:"#00bcd4" }}>*</span></label>
-                <input style={{ ...INPUT, borderColor: errors.email ? "#e74c3c" : "#2a3a5a" }} placeholder="Email address" value={form.email} onChange={e => setForm(f => ({ ...f, email:e.target.value }))} />
-                {errors.email && <p style={{ color:"#e74c3c", fontSize:11, margin:"3px 0 0" }}>{errors.email}</p>}
+                <label className="form-label">Email <span style={{ color:"#00bcd4" }}>*</span></label>
+                <input className={`form-input${errors.email ? " error" : ""}`} placeholder="Email address" value={form.email} onChange={e => setForm(f => ({ ...f, email:e.target.value }))} />
+                {errors.email && <p className="form-error">{errors.email}</p>}
               </div>
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:14 }}>
+            <div className="form-grid-2">
               <div>
-                <label style={LBL}>Phone Number <span style={{ color:"#555", fontSize:10 }}>(optional)</span></label>
-                <input style={INPUT} placeholder="+63 912 345 6789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone:e.target.value }))} />
+                <label className="form-label">Phone Number <span style={{ color:"#555", fontSize:10 }}>(optional)</span></label>
+                <input className="form-input" placeholder="+63 912 345 6789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone:e.target.value }))} />
               </div>
               <div>
-                <label style={LBL}>Address <span style={{ color:"#555", fontSize:10 }}>(optional)</span></label>
-                <input style={INPUT} placeholder="City, Country" value={form.address} onChange={e => setForm(f => ({ ...f, address:e.target.value }))} />
+                <label className="form-label">Address <span style={{ color:"#555", fontSize:10 }}>(optional)</span></label>
+                <input className="form-input" placeholder="City, Country" value={form.address} onChange={e => setForm(f => ({ ...f, address:e.target.value }))} />
               </div>
             </div>
             <div style={{ marginBottom:20 }}>
-              <label style={LBL}>Message / Project Details</label>
-              <textarea style={{ ...INPUT, minHeight:80, resize:"vertical" }} placeholder="Tell me about your project..." value={form.message} onChange={e => setForm(f => ({ ...f, message:e.target.value }))} />
+              <label className="form-label">Message / Project Details</label>
+              <textarea className="form-input" style={{ minHeight:80, resize:"vertical" }} placeholder="Tell me about your project..." value={form.message} onChange={e => setForm(f => ({ ...f, message:e.target.value }))} />
             </div>
             <div>
-              <label style={{ ...LBL, fontSize:13, color:"#e0e0e0", marginBottom:10 }}>
+              <label style={{ fontSize:13, color:"#e0e0e0", marginBottom:10, display:"block", letterSpacing:0.5 }}>
                 Services Interested In <span style={{ color:"#00bcd4" }}>*</span>
               </label>
-              {errors.services && <p style={{ color:"#e74c3c", fontSize:11.5, margin:"0 0 10px" }}>{errors.services}</p>}
-              <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:16 }}>
+              {errors.services && <p className="form-error" style={{ marginBottom:10 }}>{errors.services}</p>}
+              <div className="cats-wrap">
                 {SERVICE_CATEGORIES.map(cat => (
                   <SvcCheck key={cat} label={cat} checked={selCats.includes(cat)} onChange={() => toggleCat(cat)} />
                 ))}
               </div>
-              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
-                <p style={{ color:"#00bcd4", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>📌 Branding Items</p>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
-                  {BRANDING_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
+              {[
+                { title:"📌 Branding Items", color:"#00bcd4", items:BRANDING_ITEMS },
+                { title:"🌐 Web & Online Items", color:"#00bcd4", items:WEB_ITEMS },
+                { title:"🎨 Other Service Items", color:"#00bcd4", items:OTHER_ITEMS },
+                { title:"🔧 Repair Service Items", color:"#2ecc71", items:REPAIR_ITEMS },
+                { title:"🎬 Video Editing Items", color:"#e74c8b", items:VIDEO_ITEMS },
+                { title:"📸 Photo Editing Items", color:"#f39c12", items:PHOTO_EDITING_ITEMS },
+              ].map(({ title, color, items }) => (
+                <div key={title} className="svc-section">
+                  <p className="svc-section-title" style={{ color }}>{title}</p>
+                  <div className="svc-check-grid">
+                    {items.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
+                  </div>
                 </div>
-              </div>
-              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
-                <p style={{ color:"#00bcd4", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🌐 Web & Online Items</p>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
-                  {WEB_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
-                </div>
-              </div>
-              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
-                <p style={{ color:"#00bcd4", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🎨 Other Service Items</p>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
-                  {OTHER_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
-                </div>
-              </div>
-              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
-                <p style={{ color:"#2ecc71", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🔧 Repair Service Items</p>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
-                  {REPAIR_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
-                </div>
-              </div>
-              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
-                <p style={{ color:"#e74c8b", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🎬 Video Editing Items</p>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
-                  {VIDEO_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
-                </div>
-              </div>
-              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px" }}>
-                <p style={{ color:"#f39c12", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>📸 Photo Editing Items</p>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
-                  {PHOTO_EDITING_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
-                </div>
-              </div>
+              ))}
             </div>
             {allSelected.length > 0 && (
-              <div style={{ background:"#071a0e", border:"1px solid #00bcd4", borderRadius:4, padding:"10px 14px", margin:"16px 0 0" }}>
-                <p style={{ color:"#00bcd4", fontSize:11, fontWeight:700, margin:"0 0 5px", textTransform:"uppercase", letterSpacing:1 }}>✔ Selected ({allSelected.length}):</p>
-                <p style={{ color:"#ccc", fontSize:12.5, margin:0, lineHeight:1.7 }}>{allSelected.join(" · ")}</p>
+              <div className="selected-summary">
+                <p className="selected-label">✔ Selected ({allSelected.length}):</p>
+                <p className="selected-items">{allSelected.join(" · ")}</p>
               </div>
             )}
-            <button
-              onClick={() => validate() && setStep("preview")}
-              style={{ width:"100%", padding:13, background:"#00bcd4", color:"#fff", border:"none", fontWeight:800, fontSize:14, letterSpacing:2, textTransform:"uppercase", cursor:"pointer", marginTop:20 }}
-              onMouseEnter={e => (e.target.style.background = "#00a3b8")}
-              onMouseLeave={e => (e.target.style.background = "#00bcd4")}
-            >
-              ✉ PREVIEW EMAIL
-            </button>
+            <button className="preview-btn" onClick={() => validate() && setStep("preview")}>✉ PREVIEW EMAIL</button>
           </div>
         ) : (
-          <div style={{ padding:"24px 28px 32px" }}>
-            <div style={{ background:"#141c30", border:"1px solid #2a3a5a", borderRadius:6, overflow:"hidden", marginBottom:20 }}>
-              <div style={{ padding:"14px 18px", borderBottom:"1px solid #2a3a5a" }}>
+          <div className="modal-body">
+            <div className="email-preview-box">
+              <div className="email-header">
                 {[
                   ["To:", "Creationniel6@gmail.com", "#00bcd4"],
                   ["From:", form.email, "#e0e0e0"],
                   ["Sub:", `Service Inquiry — ${allSelected.slice(0,3).join(", ")}${allSelected.length > 3 ? ` +${allSelected.length-3} more` : ""}`, "#e0e0e0"],
                 ].map(([lbl, val, col]) => (
-                  <div key={lbl} style={{ display:"flex", gap:8, alignItems:"flex-start", marginBottom:5 }}>
-                    <span style={{ color:"#888", fontSize:12, width:40, flexShrink:0 }}>{lbl}</span>
+                  <div key={lbl} className="email-row">
+                    <span className="email-lbl">{lbl}</span>
                     <span style={{ color:col, fontSize:13, fontWeight: lbl === "Sub:" ? 600 : 400 }}>{val}</span>
                   </div>
                 ))}
               </div>
-              <pre style={{ margin:0, padding:"18px", color:"#ccc", fontSize:13, lineHeight:1.9, whiteSpace:"pre-wrap", fontFamily:"'Courier New', monospace", background:"#0d1625" }}>
-                {emailBody}
-              </pre>
+              <pre className="email-body-pre">{emailBody}</pre>
             </div>
-            <div style={{ background:"#111c2e", border:"1px solid #1e3a2a", borderRadius:6, padding:"14px 16px", marginBottom:20 }}>
-              <p style={{ color:"#00bcd4", fontWeight:700, fontSize:13, margin:"0 0 10px" }}>📎 How to attach files in Gmail (after clicking Send)</p>
+            <div className="attach-tips">
+              <p className="attach-title">📎 How to attach files in Gmail (after clicking Send)</p>
               {[
                 `After you click "Send Message", Gmail will open in a new tab with your message pre-filled.`,
                 "Look for the Attach files icon (paperclip) at the bottom of the compose window.",
-                "Click the paperclip icon, then select Images, documents, or any files from your computer (design briefs, logos, references, etc.).",
+                "Click the paperclip icon, then select images, documents, or any files from your computer.",
                 "You can also drag & drop files directly into the email window.",
-                "Once files are attached, review your message and click Send — your attachments will be delivered along with the inquiry.",
+                "Once files are attached, review your message and click Send.",
               ].map((tip, i) => (
-                <div key={i} style={{ display:"flex", gap:10, marginBottom:7, alignItems:"flex-start" }}>
-                  <span style={{ background:"#00bcd4", color:"#fff", borderRadius:"50%", width:18, height:18, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:700, flexShrink:0, marginTop:1 }}>{i+1}</span>
-                  <p style={{ color:"#aaa", fontSize:12.5, margin:0, lineHeight:1.6 }}>{tip}</p>
+                <div key={i} className="tip-row">
+                  <span className="tip-num">{i+1}</span>
+                  <p className="tip-text">{tip}</p>
                 </div>
               ))}
-              <p style={{ color:"#555", fontSize:11, marginTop:10, marginBottom:0 }}>💡 Pro tip: Max attachment in Gmail is 25MB. For larger files, share via Google Drive link or compress first.</p>
+              <p style={{ color:"#555", fontSize:11, marginTop:10 }}>💡 Pro tip: Max attachment in Gmail is 25MB. For larger files, share via Google Drive link.</p>
             </div>
-            <div style={{ display:"flex", gap:12 }}>
-              <button onClick={() => setStep("form")} style={{ flex:1, padding:12, background:"transparent", border:"1px solid #2a3a5a", color:"#aaa", fontWeight:700, fontSize:13, cursor:"pointer", letterSpacing:1 }}>
-                ← EDIT
-              </button>
-              <a
-                href={gmailUrl} target="_blank" rel="noopener noreferrer"
-                style={{ flex:2, padding:12, background:"#00bcd4", color:"#fff", fontWeight:800, fontSize:13, letterSpacing:1.5, textDecoration:"none", textTransform:"uppercase", textAlign:"center", display:"flex", alignItems:"center", justifyContent:"center", gap:8, transition:"background 0.2s" }}
-                onMouseEnter={e => (e.currentTarget.style.background = "#00a3b8")}
-                onMouseLeave={e => (e.currentTarget.style.background = "#00bcd4")}
-              >
-                ✈ SEND MESSAGE
-              </a>
+            <div className="modal-btns">
+              <button className="btn-edit" onClick={() => setStep("form")}>← EDIT</button>
+              <a className="btn-send" href={gmailUrl} target="_blank" rel="noopener noreferrer">✈ SEND MESSAGE</a>
             </div>
-            <p style={{ color:"#555", fontSize:11.5, textAlign:"center", marginTop:10, marginBottom:0 }}>
-              Fill out this form, then click Send. Gmail will open with your message — simply attach your files using the paperclip icon.
+            <p style={{ color:"#555", fontSize:11.5, textAlign:"center", marginTop:10 }}>
+              Gmail will open with your message — simply attach your files using the paperclip icon.
             </p>
           </div>
         )}
@@ -328,62 +417,53 @@ ${form.name}`;
 
 export default function ServicesPage() {
   const [modal, setModal] = useState({ open:false, category:null });
-
   const openModal = (cat) => setModal({ open:true, category:cat });
   const closeModal = () => setModal({ open:false, category:null });
 
   return (
-    <div style={{ fontFamily:"'Segoe UI', sans-serif", margin:0, padding:0 }}>
+    <div className="services-page">
+      <style>{styles}</style>
 
       <InquiryModal open={modal.open} onClose={closeModal} defaultCategory={modal.category} />
 
       {/* ── HERO ── */}
-      <section style={{ position:"relative", overflow:"hidden", minHeight:480, display:"flex", alignItems:"center", background:"#0a1628" }}>
-        <div style={{ position:"absolute", inset:0, background:"linear-gradient(135deg, #0a1628 0%, #0d2a3a 40%, #003d4d 100%)", zIndex:0 }} />
-        <div style={{ position:"absolute", top:-80, right:-60, width:500, height:500, borderRadius:"50%", background:"radial-gradient(circle, rgba(0,188,212,0.18) 0%, transparent 70%)", zIndex:0 }} />
-        <div style={{ position:"absolute", bottom:-100, left:"30%", width:350, height:350, borderRadius:"50%", background:"radial-gradient(circle, rgba(0,188,212,0.10) 0%, transparent 70%)", zIndex:0 }} />
-        <div style={{ position:"absolute", inset:0, backgroundImage:"repeating-linear-gradient(120deg, transparent, transparent 60px, rgba(0,188,212,0.03) 60px, rgba(0,188,212,0.03) 61px)", zIndex:0 }} />
-        <div style={{ position:"absolute", left:0, top:0, bottom:0, width:5, background:"linear-gradient(to bottom, #00bcd4, #0097a7, transparent)", zIndex:2 }} />
-        <div style={{ position:"relative", zIndex:2, display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"70px 80px" }}>
-          <div style={{ maxWidth:560 }}>
-            <div style={{ display:"inline-flex", alignItems:"center", gap:14, marginBottom:26 }}>
-              <span style={{ display:"inline-block", width:48, height:3, background:"linear-gradient(90deg,#00bcd4,#00e5ff)", borderRadius:2 }} />
-              <span style={{ color:"#00e5ff", fontWeight:900, fontSize:20, letterSpacing:6, textTransform:"uppercase", textShadow:"0 0 20px rgba(0,229,255,0.45)" }}>Our Services</span>
-              <span style={{ display:"inline-block", width:48, height:3, background:"linear-gradient(90deg,#00e5ff,#00bcd4)", borderRadius:2 }} />
+      <section className="hero">
+        <div className="hero-bg" />
+        <div className="hero-glow1" />
+        <div className="hero-glow2" />
+        <div className="hero-grid" />
+        <div className="hero-stripe" />
+        <div className="hero-inner">
+          <div className="hero-content">
+            <div className="hero-eyebrow">
+              <span className="hero-eyebrow-line" style={{ background:"linear-gradient(90deg,#00bcd4,#00e5ff)" }} />
+              <span className="hero-eyebrow-text">Our Services</span>
+              <span className="hero-eyebrow-line" style={{ background:"linear-gradient(90deg,#00e5ff,#00bcd4)" }} />
             </div>
-            <h1 style={{ margin:"0 0 10px", padding:0, lineHeight:1.05 }}>
-              <span style={{ display:"block", color:"#ffffff", fontSize:"clamp(32px,4.5vw,54px)", fontWeight:800, letterSpacing:-1 }}>Top Agency Quality</span>
-              <span style={{ display:"block", color:"#ffffff", fontSize:"clamp(32px,4.5vw,54px)", fontWeight:800, letterSpacing:-1 }}>at only the</span>
-              <span style={{ display:"block", fontSize:"clamp(32px,4.5vw,54px)", fontWeight:900, letterSpacing:-1, background:"linear-gradient(90deg,#00e5ff,#00bcd4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
-                Fraction of the price
-              </span>
+            <h1 className="hero-title">
+              <span className="hero-title-white">Top Agency Quality</span>
+              <span className="hero-title-white">at only the</span>
+              <span className="hero-title-grad">Fraction of the price</span>
             </h1>
-            <div style={{ width:60, height:3, background:"linear-gradient(90deg,#00bcd4,transparent)", margin:"22px 0 24px", borderRadius:2 }} />
-            <ul style={{ listStyle:"none", padding:0, margin:"0 0 36px" }}>
+            <div className="hero-divider" />
+            <ul className="hero-list">
               {[
                 "High Caliber Professional Branding & Applications",
                 "Marketing Strategy & Marketing Collaterals",
                 "Website Design, Development, & Custom Features",
                 "Complete Branding of Print, Web, Interior, and More",
               ].map((item, i) => (
-                <li key={i} style={{ display:"flex", alignItems:"center", color:"rgba(255,255,255,0.85)", fontSize:15, marginBottom:12, gap:14 }}>
-                  <span style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:22, height:22, borderRadius:"50%", border:"1.5px solid rgba(0,188,212,0.6)", flexShrink:0 }}>
-                    <span style={{ display:"inline-block", width:7, height:7, borderRadius:"50%", background:"#00bcd4" }} />
-                  </span>
+                <li key={i}>
+                  <span className="hero-list-dot"><span className="hero-list-inner" /></span>
                   {item}
                 </li>
               ))}
             </ul>
-            <button
-              onClick={() => openModal(null)}
-              style={{ position:"relative", overflow:"hidden", background:"linear-gradient(90deg,#00bcd4,#0097a7)", color:"#fff", border:"none", padding:"15px 40px", fontWeight:800, fontSize:13, letterSpacing:2.5, textTransform:"uppercase", cursor:"pointer", borderRadius:2, boxShadow:"0 8px 32px rgba(0,188,212,0.35)", transition:"transform 0.2s, box-shadow 0.2s" }}
-              onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 12px 40px rgba(0,188,212,0.5)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="0 8px 32px rgba(0,188,212,0.35)"; }}
-            >
-              MAKE AN INQUIRY →
-            </button>
+            <button className="hero-cta" onClick={() => openModal(null)}>MAKE AN INQUIRY →</button>
           </div>
-          <div style={{ position:"relative", flexShrink:0, width:360, height:360 }}>
+
+          {/* Orbital visual — hidden on tablet/mobile via CSS */}
+          <div className="hero-visual">
             <div style={{ position:"absolute", inset:0, borderRadius:"50%", border:"1px solid rgba(0,188,212,0.15)" }} />
             <div style={{ position:"absolute", inset:20, borderRadius:"50%", border:"1px dashed rgba(0,188,212,0.2)" }} />
             <div style={{ position:"absolute", inset:50, borderRadius:"50%", border:"1px solid rgba(0,188,212,0.1)", background:"rgba(0,188,212,0.04)" }} />
@@ -412,41 +492,35 @@ export default function ServicesPage() {
               <path d="M60,50 Q85,38 98,48" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
               <path d="M60,85 Q45,105 36,120" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
               <path d="M60,85 Q75,105 84,120" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-              <line x1="5" y1="60" x2="25" y2="60" stroke="rgba(0,188,212,0.4)" strokeWidth="1.5" strokeLinecap="round" />
-              <line x1="8" y1="72" x2="22" y2="72" stroke="rgba(0,188,212,0.25)" strokeWidth="1.5" strokeLinecap="round" />
-              <line x1="95" y1="60" x2="115" y2="60" stroke="rgba(0,188,212,0.4)" strokeWidth="1.5" strokeLinecap="round" />
-              <line x1="98" y1="72" x2="112" y2="72" stroke="rgba(0,188,212,0.25)" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <div style={{ position:"absolute", bottom:10, right:10, background:"rgba(0,188,212,0.12)", border:"1px solid rgba(0,188,212,0.35)", borderRadius:8, padding:"10px 16px", textAlign:"center", backdropFilter:"blur(8px)" }}>
-              <p style={{ color:"#00bcd4", fontSize:22, fontWeight:900, margin:0, lineHeight:1 }}>100%</p>
-              <p style={{ color:"rgba(255,255,255,0.7)", fontSize:10.5, margin:"3px 0 0", letterSpacing:0.5 }}>Client Satisfaction</p>
+              <p style={{ color:"#00bcd4", fontSize:22, fontWeight:900, lineHeight:1 }}>100%</p>
+              <p style={{ color:"rgba(255,255,255,0.7)", fontSize:10.5, marginTop:3, letterSpacing:0.5 }}>Client Satisfaction</p>
             </div>
           </div>
         </div>
-        <div style={{ position:"absolute", bottom:0, left:0, right:0, zIndex:1 }}>
+        <div className="hero-wave">
           <svg viewBox="0 0 1440 40" preserveAspectRatio="none" style={{ display:"block", width:"100%", height:40 }}>
             <path d="M0,20 Q360,0 720,20 Q1080,40 1440,20 L1440,40 L0,40 Z" fill="#f4f4f4" />
           </svg>
         </div>
       </section>
 
-      {/* ── SERVICE CARDS ── */}
-      <section style={{ background:"#f4f4f4", padding:"0 60px 60px" }}>
-
-        {/* Row 1: 3 cards */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:0, maxWidth:1100, margin:"0 auto" }}>
+      {/* ── SERVICE CARDS ROW 1 ── */}
+      <section className="cards-section">
+        <div className="cards-row">
           {[
-            { key:"branding", img:serviceImages.branding, bg:"#222", title:"Branding Services", desc:"We create brand identity that effectively communicates with our client's goals, target market, and strategy.", items:BRANDING_ITEMS, cat:"Branding", border:"1px solid #e8e8e8" },
-            { key:"web", img:serviceImages.web, bg:"#1a3a5c", title:"Web & Online", desc:"Each website we create aims to communicate our client's message while captivating their visitor to get interested in availing products and services.", items:WEB_ITEMS, cat:"Web & Online", border:"1px solid #e8e8e8", borderL:"none", borderR:"none" },
-            { key:"other", img:serviceImages.other, bg:"#3a3a2a", title:"Other Services", desc:"We specialize in doing any multimedia creative work and strategy that our clients need for branding. Don't hesitate to ask or inquire.", items:OTHER_ITEMS, cat:"Other Services", border:"1px solid #e8e8e8" },
-          ].map(({ key, img, bg, title, desc, items, cat, border, borderL, borderR }) => (
-            <div key={key} style={{ background:"#fff", overflow:"hidden", border, borderLeft:borderL, borderRight:borderR }}>
-              <div style={{ height:200, overflow:"hidden", background:bg }}>
-                <img src={img} alt={title} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:0.9 }} />
+            { key:"branding", img:serviceImages.branding, bg:"#222", title:"Branding Services", desc:"We create brand identity that effectively communicates with our client's goals, target market, and strategy.", items:BRANDING_ITEMS, cat:"Branding" },
+            { key:"web", img:serviceImages.web, bg:"#1a3a5c", title:"Web & Online", desc:"Each website we create aims to communicate our client's message while captivating their visitor to get interested in availing products and services.", items:WEB_ITEMS, cat:"Web & Online" },
+            { key:"other", img:serviceImages.other, bg:"#3a3a2a", title:"Other Services", desc:"We specialize in doing any multimedia creative work and strategy that our clients need for branding. Don't hesitate to ask or inquire.", items:OTHER_ITEMS, cat:"Other Services" },
+          ].map(({ key, img, bg, title, desc, items, cat }) => (
+            <div key={key} className="card" style={{ borderTop: key === "branding" ? "1px solid #e8e8e8" : undefined }}>
+              <div className="card-img-wrap" style={{ background:bg }}>
+                <img src={img} alt={title} />
               </div>
-              <div style={{ padding:"28px 28px 32px" }}>
-                <h3 style={{ fontSize:22, fontWeight:700, color:"#1a1a1a", marginBottom:12 }}>{title}</h3>
-                <p style={{ color:"#00bcd4", fontSize:14, lineHeight:1.6, marginBottom:16 }}>{desc}</p>
+              <div className="card-body">
+                <h3 className="card-title">{title}</h3>
+                <p className="card-desc">{desc}</p>
                 <ServiceList items={items} />
                 <InquireBtn onClick={() => openModal(cat)} />
               </div>
@@ -454,24 +528,24 @@ export default function ServicesPage() {
           ))}
         </div>
 
-        {/* Row 2: 3 cards — Repair, Video, Photo Editing */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:0, maxWidth:1100, margin:"0 auto" }}>
+        {/* Row 2 */}
+        <div className="cards-row">
           {[
             { key:"repair", img:serviceImages.repair, bg:"#1a2a1a", title:"Repair Services", desc:"We provide fast, reliable repair solutions for your electronics, gadgets, and devices. From screen fixes to full hardware overhauls — we've got you covered.", items:REPAIR_ITEMS, cat:"Repair Services", accent:"#2ecc71" },
             { key:"video", img:serviceImages.video, bg:"#1a1a3a", title:"Video Editing", desc:"We craft compelling video content that tells your brand's story. From corporate films to social reels — professional editing that captivates your audience.", items:VIDEO_ITEMS, cat:"Video Editing", accent:"#e74c8b" },
             { key:"photo", img:serviceImages.photo, bg:"#2a1a0a", title:"Photo Editing", desc:"We deliver flawless photo retouching and enhancement services. From skin retouching to full composite editing — we make every image picture-perfect.", items:PHOTO_EDITING_ITEMS, cat:"Photo Editing", accent:"#f39c12" },
           ].map(({ key, img, bg, title, desc, items, cat, accent }) => (
-            <div key={key} style={{ background:"#fff", overflow:"hidden", border:"1px solid #e8e8e8", borderTop:"none", position:"relative" }}>
-              <div style={{ height:4, background:`linear-gradient(90deg, ${accent}, #00bcd4)`, position:"absolute", top:0, left:0, right:0, zIndex:1 }} />
-              <div style={{ height:200, overflow:"hidden", background:bg }}>
-                <img src={img} alt={title} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:0.9 }} />
+            <div key={key} className="card" style={{ borderTop:"none" }}>
+              <div className="card-accent-bar" style={{ background:`linear-gradient(90deg,${accent},#00bcd4)` }} />
+              <div className="card-img-wrap" style={{ background:bg }}>
+                <img src={img} alt={title} />
               </div>
-              <div style={{ padding:"28px 28px 32px" }}>
-                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
-                  <span style={{ display:"inline-block", width:4, height:24, background:`linear-gradient(to bottom, ${accent}, #00bcd4)`, borderRadius:2 }} />
-                  <h3 style={{ fontSize:22, fontWeight:700, color:"#1a1a1a", margin:0 }}>{title}</h3>
+              <div className="card-body">
+                <div className="card-title-row">
+                  <span className="card-title-stripe" style={{ background:`linear-gradient(to bottom,${accent},#00bcd4)` }} />
+                  <h3 className="card-title" style={{ margin:0 }}>{title}</h3>
                 </div>
-                <p style={{ color:"#00bcd4", fontSize:14, lineHeight:1.6, marginBottom:16 }}>{desc}</p>
+                <p className="card-desc">{desc}</p>
                 <ServiceList items={items} />
                 <InquireBtn onClick={() => openModal(cat)} />
               </div>
@@ -481,24 +555,21 @@ export default function ServicesPage() {
       </section>
 
       {/* ── CTA BANNER ── */}
-      <section style={{ background:"#00bcd4", padding:"22px 60px", textAlign:"center" }}>
-        <p style={{ color:"#fff", fontWeight:700, fontSize:18, margin:0 }}>Contact us now to get a FREE Consultation and Project Estimate</p>
+      <section className="cta-banner">
+        <p>Contact us now to get a FREE Consultation and Project Estimate</p>
       </section>
 
       {/* ── BRAND STATEMENT ── */}
-      <section style={{ position:"relative", minHeight:280, display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden", background:"#0d2d4a" }}>
-        <div style={{ position:"absolute", inset:0, background:"repeating-linear-gradient(90deg,rgba(0,188,212,0.07) 0px,rgba(0,188,212,0.07) 1px,transparent 1px,transparent 80px),repeating-linear-gradient(0deg,rgba(0,188,212,0.07) 0px,rgba(0,188,212,0.07) 1px,transparent 1px,transparent 80px)", zIndex:1 }} />
-        {["5%","50%"].map((left, i) => (
-          <div key={i} style={{ position:"absolute", top:"50%", left, transform:"translateY(-50%)", opacity:0.07, fontSize:52, fontWeight:900, color:"#00bcd4", letterSpacing:4, whiteSpace:"nowrap", userSelect:"none", pointerEvents:"none", zIndex:1 }}>WESTWOOD</div>
-        ))}
-        <div style={{ position:"relative", zIndex:2, maxWidth:820, textAlign:"center", padding:"50px 40px" }}>
-          <p style={{ color:"#00bcd4", fontWeight:700, fontSize:"clamp(14px,2vw,18px)", lineHeight:1.7, marginBottom:20 }}>
+      <section className="brand-stmt">
+        <div className="brand-grid-bg" />
+        <div className="brand-watermark" style={{ left:"5%" }}>WESTWOOD</div>
+        <div className="brand-watermark" style={{ left:"50%" }}>WESTWOOD</div>
+        <div className="brand-content">
+          <p>
             We know how to guide SME & Corporate brands through the delicate process of reinvigorating their passion and how they communicate it through visual and aural touch points. We help traverse potential negative pushback from current brand fans while accentuating the potential for success. That's what you get when working with us.
           </p>
-          <p style={{ color:"#ccc", fontSize:14, marginBottom:28 }}>Don't spend on designers that don't work or understand what your business needs.</p>
-          <button onClick={() => openModal(null)} style={{ background:"#00bcd4", color:"#fff", border:"none", padding:"14px 36px", fontWeight:700, fontSize:13, letterSpacing:2, textTransform:"uppercase", cursor:"pointer" }}>
-            MAKE AN INQUIRY
-          </button>
+          <p>Don't spend on designers that don't work or understand what your business needs.</p>
+          <button className="brand-btn" onClick={() => openModal(null)}>MAKE AN INQUIRY</button>
         </div>
       </section>
     </div>
