@@ -322,34 +322,134 @@ export default function ServicesPage() {
       <InquiryModal open={modal.open} onClose={closeModal} defaultCategory={modal.category} />
 
       {/* ── HERO ── */}
-      <section style={{ background:"#00bcd4", padding:"60px 80px", display:"flex", alignItems:"center", justifyContent:"space-between", minHeight:340, position:"relative", overflow:"hidden" }}>
-        <div style={{ maxWidth:520, zIndex:2, position:"relative" }}>
-          <p style={{ color:"#1a4a6b", fontWeight:700, fontSize:13, letterSpacing:2, marginBottom:12, textTransform:"uppercase" }}>OUR SERVICES</p>
-          <h1 style={{ color:"#fff", fontSize:"clamp(28px,4vw,42px)", fontWeight:700, lineHeight:1.2, margin:"0 0 28px" }}>
-            Top Agency Quality at only the<br />Fraction of the price
-          </h1>
-          <ul style={{ listStyle:"none", padding:0, margin:"0 0 32px" }}>
-            {["High Caliber Professional Branding & Applications","Marketing Strategy & Marketing Collaterals","Website Design, Development, & Custom Features","Complete Branding of Print, Web, Interior, and More"].map((item, i) => (
-              <li key={i} style={{ display:"flex", alignItems:"flex-start", color:"#fff", fontSize:15, marginBottom:10 }}>
-                <span style={{ display:"inline-block", width:11, height:11, background:"#1a4a6b", marginRight:12, flexShrink:0, marginTop:4 }} />{item}
-              </li>
-            ))}
-          </ul>
-          <button onClick={() => openModal(null)} style={{ background:"#1a4a6b", color:"#fff", border:"none", padding:"12px 28px", fontWeight:700, fontSize:13, letterSpacing:1.5, textTransform:"uppercase", cursor:"pointer" }}>
-            MAKE AN INQUIRY
-          </button>
+      <section style={{ position:"relative", overflow:"hidden", minHeight:480, display:"flex", alignItems:"center", background:"#0a1628" }}>
+
+        {/* Animated gradient background */}
+        <div style={{ position:"absolute", inset:0, background:"linear-gradient(135deg, #0a1628 0%, #0d2a3a 40%, #003d4d 100%)", zIndex:0 }} />
+
+        {/* Teal accent blobs */}
+        <div style={{ position:"absolute", top:-80, right:-60, width:500, height:500, borderRadius:"50%", background:"radial-gradient(circle, rgba(0,188,212,0.18) 0%, transparent 70%)", zIndex:0 }} />
+        <div style={{ position:"absolute", bottom:-100, left:"30%", width:350, height:350, borderRadius:"50%", background:"radial-gradient(circle, rgba(0,188,212,0.10) 0%, transparent 70%)", zIndex:0 }} />
+
+        {/* Diagonal stripe overlay */}
+        <div style={{ position:"absolute", inset:0, backgroundImage:"repeating-linear-gradient(120deg, transparent, transparent 60px, rgba(0,188,212,0.03) 60px, rgba(0,188,212,0.03) 61px)", zIndex:0 }} />
+
+        {/* Left accent bar */}
+        <div style={{ position:"absolute", left:0, top:0, bottom:0, width:5, background:"linear-gradient(to bottom, #00bcd4, #0097a7, transparent)", zIndex:2 }} />
+
+        {/* Content */}
+        <div style={{ position:"relative", zIndex:2, display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"70px 80px" }}>
+
+          {/* Left: Text */}
+          <div style={{ maxWidth:560 }}>
+            {/* Label */}
+            <div style={{ display:"inline-flex", alignItems:"center", gap:14, marginBottom:26 }}>
+              <span style={{ display:"inline-block", width:48, height:3, background:"linear-gradient(90deg,#00bcd4,#00e5ff)", borderRadius:2 }} />
+              <span style={{ color:"#00e5ff", fontWeight:900, fontSize:20, letterSpacing:6, textTransform:"uppercase", textShadow:"0 0 20px rgba(0,229,255,0.45)" }}>Our Services</span>
+              <span style={{ display:"inline-block", width:48, height:3, background:"linear-gradient(90deg,#00e5ff,#00bcd4)", borderRadius:2 }} />
+            </div>
+
+            {/* Headline */}
+            <h1 style={{ margin:"0 0 10px", padding:0, lineHeight:1.05 }}>
+              <span style={{ display:"block", color:"#ffffff", fontSize:"clamp(32px,4.5vw,54px)", fontWeight:800, letterSpacing:-1 }}>Top Agency Quality</span>
+              <span style={{ display:"block", color:"#ffffff", fontSize:"clamp(32px,4.5vw,54px)", fontWeight:800, letterSpacing:-1 }}>at only the</span>
+              <span style={{ display:"block", fontSize:"clamp(32px,4.5vw,54px)", fontWeight:900, letterSpacing:-1, background:"linear-gradient(90deg,#00e5ff,#00bcd4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+                Fraction of the price
+              </span>
+            </h1>
+
+            {/* Divider */}
+            <div style={{ width:60, height:3, background:"linear-gradient(90deg,#00bcd4,transparent)", margin:"22px 0 24px", borderRadius:2 }} />
+
+            {/* Bullet list */}
+            <ul style={{ listStyle:"none", padding:0, margin:"0 0 36px" }}>
+              {[
+                "High Caliber Professional Branding & Applications",
+                "Marketing Strategy & Marketing Collaterals",
+                "Website Design, Development, & Custom Features",
+                "Complete Branding of Print, Web, Interior, and More",
+              ].map((item, i) => (
+                <li key={i} style={{ display:"flex", alignItems:"center", color:"rgba(255,255,255,0.85)", fontSize:15, marginBottom:12, gap:14 }}>
+                  <span style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:22, height:22, borderRadius:"50%", border:"1.5px solid rgba(0,188,212,0.6)", flexShrink:0 }}>
+                    <span style={{ display:"inline-block", width:7, height:7, borderRadius:"50%", background:"#00bcd4" }} />
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA Button */}
+            <button
+              onClick={() => openModal(null)}
+              style={{ position:"relative", overflow:"hidden", background:"linear-gradient(90deg,#00bcd4,#0097a7)", color:"#fff", border:"none", padding:"15px 40px", fontWeight:800, fontSize:13, letterSpacing:2.5, textTransform:"uppercase", cursor:"pointer", borderRadius:2, boxShadow:"0 8px 32px rgba(0,188,212,0.35)", transition:"transform 0.2s, box-shadow 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 12px 40px rgba(0,188,212,0.5)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="0 8px 32px rgba(0,188,212,0.35)"; }}
+            >
+              MAKE AN INQUIRY →
+            </button>
+          </div>
+
+          {/* Right: Visual graphic */}
+          <div style={{ position:"relative", flexShrink:0, width:360, height:360 }}>
+            {/* Outer ring */}
+            <div style={{ position:"absolute", inset:0, borderRadius:"50%", border:"1px solid rgba(0,188,212,0.15)" }} />
+            <div style={{ position:"absolute", inset:20, borderRadius:"50%", border:"1px dashed rgba(0,188,212,0.2)" }} />
+            <div style={{ position:"absolute", inset:50, borderRadius:"50%", border:"1px solid rgba(0,188,212,0.1)", background:"rgba(0,188,212,0.04)" }} />
+
+            {/* Center glow */}
+            <div style={{ position:"absolute", inset:"50%", transform:"translate(-50%,-50%)", width:120, height:120, borderRadius:"50%", background:"radial-gradient(circle,rgba(0,188,212,0.25) 0%,transparent 70%)" }} />
+
+            {/* Service icon cards orbiting */}
+            {[
+              { label:"Branding", icon:"🎨", angle:0 },
+              { label:"Web Dev", icon:"💻", angle:90 },
+              { label:"Marketing", icon:"📣", angle:180 },
+              { label:"Photography", icon:"📷", angle:270 },
+            ].map(({ label, icon, angle }) => {
+              const rad = (angle * Math.PI) / 180;
+              const r = 130;
+              const cx = 180, cy = 180;
+              const x = cx + r * Math.sin(rad) - 42;
+              const y = cy - r * Math.cos(rad) - 22;
+              return (
+                <div key={label} style={{ position:"absolute", left:x, top:y, background:"rgba(0,30,50,0.85)", border:"1px solid rgba(0,188,212,0.4)", borderRadius:8, padding:"8px 14px", backdropFilter:"blur(8px)", display:"flex", alignItems:"center", gap:8, minWidth:84 }}>
+                  <span style={{ fontSize:16 }}>{icon}</span>
+                  <span style={{ color:"#fff", fontSize:11.5, fontWeight:600, whiteSpace:"nowrap" }}>{label}</span>
+                </div>
+              );
+            })}
+
+            {/* Center SVG figure */}
+            <svg viewBox="0 0 120 140" width="120" height="140" style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", opacity:0.9 }}>
+              {/* Head */}
+              <circle cx="60" cy="22" r="14" fill="none" stroke="#00bcd4" strokeWidth="2.5" />
+              {/* Body */}
+              <line x1="60" y1="36" x2="60" y2="85" stroke="#00bcd4" strokeWidth="2.5" strokeLinecap="round" />
+              {/* Arms — raised dynamically */}
+              <path d="M60,50 Q35,38 22,48" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              <path d="M60,50 Q85,38 98,48" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              {/* Legs */}
+              <path d="M60,85 Q45,105 36,120" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              <path d="M60,85 Q75,105 84,120" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              {/* Speed lines */}
+              <line x1="5" y1="60" x2="25" y2="60" stroke="rgba(0,188,212,0.4)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="8" y1="72" x2="22" y2="72" stroke="rgba(0,188,212,0.25)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="95" y1="60" x2="115" y2="60" stroke="rgba(0,188,212,0.4)" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="98" y1="72" x2="112" y2="72" stroke="rgba(0,188,212,0.25)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+
+            {/* Stats badge */}
+            <div style={{ position:"absolute", bottom:10, right:10, background:"rgba(0,188,212,0.12)", border:"1px solid rgba(0,188,212,0.35)", borderRadius:8, padding:"10px 16px", textAlign:"center", backdropFilter:"blur(8px)" }}>
+              <p style={{ color:"#00bcd4", fontSize:22, fontWeight:900, margin:0, lineHeight:1 }}>100%</p>
+              <p style={{ color:"rgba(255,255,255,0.7)", fontSize:10.5, margin:"3px 0 0", letterSpacing:0.5 }}>Client Satisfaction</p>
+            </div>
+          </div>
         </div>
-        <div style={{ position:"absolute", right:0, top:0, width:"50%", height:"100%", opacity:0.18, background:"radial-gradient(ellipse at 70% 40%,#fff 0%,transparent 70%)", pointerEvents:"none" }} />
-        <div style={{ position:"relative", zIndex:2, width:340, height:280, display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <svg viewBox="0 0 320 280" width="320" height="280" style={{ opacity:0.85 }}>
-            <ellipse cx="200" cy="140" rx="130" ry="130" fill="rgba(255,255,255,0.08)" />
-            <ellipse cx="200" cy="140" rx="90" ry="90" fill="rgba(255,255,255,0.06)" />
-            <path d="M60,180 Q120,100 200,140 Q260,170 290,120" stroke="rgba(255,255,255,0.5)" strokeWidth="3" fill="none" />
-            <circle cx="205" cy="95" r="14" fill="rgba(255,255,255,0.7)" />
-            <path d="M205,109 L195,155 L220,170 L210,195" stroke="rgba(255,255,255,0.7)" strokeWidth="4" fill="none" strokeLinecap="round" />
-            <path d="M200,125 L175,145 M200,125 L225,142" stroke="rgba(255,255,255,0.7)" strokeWidth="4" fill="none" strokeLinecap="round" />
-            <line x1="80" y1="60" x2="160" y2="200" stroke="rgba(255,255,255,0.2)" strokeWidth="8" />
-            <line x1="240" y1="50" x2="300" y2="220" stroke="rgba(255,255,255,0.15)" strokeWidth="6" />
+
+        {/* Bottom wave divider */}
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, zIndex:1 }}>
+          <svg viewBox="0 0 1440 40" preserveAspectRatio="none" style={{ display:"block", width:"100%", height:40 }}>
+            <path d="M0,20 Q360,0 720,20 Q1080,40 1440,20 L1440,40 L0,40 Z" fill="#f4f4f4" />
           </svg>
         </div>
       </section>
