@@ -273,6 +273,27 @@ export default function ServicesPage() {
                 We create brand identity that effectively communicates with our client's goals, target market, and strategy.
               </p>
               <ServiceList pairs={brandingServices} />
+              <div style={{ marginTop: 24, textAlign: "center" }}>
+                <a
+                  href="#inquiry"
+                  style={{
+                    display: "inline-block",
+                    background: "#00bcd4",
+                    color: "#fff",
+                    padding: "11px 32px",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    letterSpacing: 1.5,
+                    textDecoration: "none",
+                    textTransform: "uppercase",
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={e => (e.target.style.background = "#00a3b8")}
+                  onMouseLeave={e => (e.target.style.background = "#00bcd4")}
+                >
+                  INQUIRE NOW
+                </a>
+              </div>
             </div>
           </div>
 
@@ -294,6 +315,27 @@ export default function ServicesPage() {
                 Each website we create aims to communicate our client's message while captivating their visitor to get interested in availing products and services.
               </p>
               <ServiceList pairs={webServices} />
+              <div style={{ marginTop: 24, textAlign: "center" }}>
+                <a
+                  href="#inquiry"
+                  style={{
+                    display: "inline-block",
+                    background: "#00bcd4",
+                    color: "#fff",
+                    padding: "11px 32px",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    letterSpacing: 1.5,
+                    textDecoration: "none",
+                    textTransform: "uppercase",
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={e => (e.target.style.background = "#00a3b8")}
+                  onMouseLeave={e => (e.target.style.background = "#00bcd4")}
+                >
+                  INQUIRE NOW
+                </a>
+              </div>
             </div>
           </div>
 
@@ -315,6 +357,27 @@ export default function ServicesPage() {
                 We specialize in doing any multimedia creative work and strategy that our clients need for branding. Don't hesitate to ask or inquire.
               </p>
               <ServiceList pairs={otherServices} />
+              <div style={{ marginTop: 24, textAlign: "center" }}>
+                <a
+                  href="#inquiry"
+                  style={{
+                    display: "inline-block",
+                    background: "#00bcd4",
+                    color: "#fff",
+                    padding: "11px 32px",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    letterSpacing: 1.5,
+                    textDecoration: "none",
+                    textTransform: "uppercase",
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={e => (e.target.style.background = "#00a3b8")}
+                  onMouseLeave={e => (e.target.style.background = "#00bcd4")}
+                >
+                  INQUIRE NOW
+                </a>
+              </div>
             </div>
           </div>
         </div>
