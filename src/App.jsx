@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import About from './About';
 import Experience from './Experience';
 import Gallery from './Gallery';
-import Testimonails from './Testimonials';
+import Testimonials from './Testimonials';
 import Contact from './Contact';
 import Portfolio from './Portfolio';
 
@@ -705,7 +705,6 @@ function Home({ navigate }) {
       } catch (err) {
         console.log('Auto-play prevented:', err);
         setVideoError(true);
-        // Try to play on user interaction
         const playOnInteraction = () => {
           video.play().catch(e => console.log('Still failed:', e));
           document.removeEventListener('click', playOnInteraction);
@@ -725,7 +724,6 @@ function Home({ navigate }) {
     
     video.addEventListener('error', handleError);
     
-    // Small delay to ensure video is ready
     const timer = setTimeout(attemptPlay, 100);
 
     return () => {
@@ -746,7 +744,6 @@ function Home({ navigate }) {
       {/* HERO SECTION - FULL SCREEN VIDEO WITH NO BLACK BARS */}
       <div className="hero-section">
         
-        {/* Video Container - fills entire screen */}
         <div className="hero-video-container">
           {!videoError ? (
             <video
@@ -771,10 +768,8 @@ function Home({ navigate }) {
           )}
         </div>
         
-        {/* Dark Overlay for better text readability */}
         <div className="hero-overlay" />
         
-        {/* Content */}
         <div className="hero-content">
           <div style={{ maxWidth: '800px', width: '90%' }}>
             <h3 style={{
@@ -858,7 +853,6 @@ function Home({ navigate }) {
           </div>
         </div>
         
-        {/* Scroll Indicator */}
         <div className="scroll-indicator">
           <span>SCROLL</span>
           <div className="scroll-indicator-line" />
@@ -994,7 +988,10 @@ function Home({ navigate }) {
           </div>
         </div>
       </section>
-      
+
+      {/* ── CONTACT SECTION ── */}
+      <Contact />
+
       <Modal project={activeModal} onClose={() => setActiveModal(null)} />
       
       {/* Scroll to Top Button */}
@@ -1060,4 +1057,3 @@ export default function App() {
     </div>
   );
 }
-
