@@ -20,6 +20,7 @@ const OTHER_ITEMS = [
   "Interior Look & Feel","Outdoor Photography","Signage Design","Studio Photography",
   "Construction Support","AVP Presentations","Booth Design","Video Editing",
   "Food Photography","3D Modeling","Indoor Photography","3D Animation",
+  "Photo Editing",
 ];
 
 const REPAIR_ITEMS = [
@@ -34,6 +35,14 @@ const VIDEO_ITEMS = [
   "Video Ads","Drone Footage","Post-Production","Color Grading",
 ];
 
+const PHOTO_EDITING_ITEMS = [
+  "Portrait Retouching","Skin Smoothing","Blemish Removal","Eye Enhancement",
+  "Background Removal","Background Replacement","Color Correction","Exposure Adjustment",
+  "Photo Restoration","Object Removal","Shadow & Highlight","Teeth Whitening",
+  "Body Reshaping","Hair Retouching","Makeup Enhancement","Frequency Separation",
+  "HDR Editing","Composite Editing","Product Photo Edit","Batch Editing",
+];
+
 const toPairs = (arr) => {
   const pairs = [];
   for (let i = 0; i < arr.length; i += 2) pairs.push([arr[i], arr[i + 1]]);
@@ -46,9 +55,10 @@ const serviceImages = {
   other: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80",
   repair: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=600&q=80",
   video: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&q=80",
+  photo: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&q=80",
 };
 
-const SERVICE_CATEGORIES = ["Branding", "Web & Online", "Other Services", "Repair Services", "Video Editing"];
+const SERVICE_CATEGORIES = ["Branding", "Web & Online", "Other Services", "Repair Services", "Video Editing", "Photo Editing"];
 
 // ─── SMALL COMPONENTS ───────────────────────────────────────────────────────
 
@@ -107,7 +117,6 @@ function InquiryModal({ open, onClose, defaultCategory }) {
   const [step, setStep] = useState("form");
   const [errors, setErrors] = useState({});
 
-  // Reset when modal opens with new category
   const prevOpen = useState(open)[0];
 
   const toggleItem = (item) => setSelItems(p => p.includes(item) ? p.filter(x => x !== item) : [...p, item]);
@@ -169,8 +178,6 @@ ${form.name}`;
 
         {step === "form" ? (
           <div style={{ padding:"24px 28px 32px" }}>
-
-            {/* Name + Email */}
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:14 }}>
               <div>
                 <label style={LBL}>Name <span style={{ color:"#00bcd4" }}>*</span></label>
@@ -183,8 +190,6 @@ ${form.name}`;
                 {errors.email && <p style={{ color:"#e74c3c", fontSize:11, margin:"3px 0 0" }}>{errors.email}</p>}
               </div>
             </div>
-
-            {/* Phone + Address */}
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:14 }}>
               <div>
                 <label style={LBL}>Phone Number <span style={{ color:"#555", fontSize:10 }}>(optional)</span></label>
@@ -195,76 +200,63 @@ ${form.name}`;
                 <input style={INPUT} placeholder="City, Country" value={form.address} onChange={e => setForm(f => ({ ...f, address:e.target.value }))} />
               </div>
             </div>
-
-            {/* Message */}
             <div style={{ marginBottom:20 }}>
               <label style={LBL}>Message / Project Details</label>
               <textarea style={{ ...INPUT, minHeight:80, resize:"vertical" }} placeholder="Tell me about your project..." value={form.message} onChange={e => setForm(f => ({ ...f, message:e.target.value }))} />
             </div>
-
-            {/* Services Section */}
             <div>
               <label style={{ ...LBL, fontSize:13, color:"#e0e0e0", marginBottom:10 }}>
                 Services Interested In <span style={{ color:"#00bcd4" }}>*</span>
               </label>
               {errors.services && <p style={{ color:"#e74c3c", fontSize:11.5, margin:"0 0 10px" }}>{errors.services}</p>}
-
-              {/* Category pills */}
               <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:16 }}>
                 {SERVICE_CATEGORIES.map(cat => (
                   <SvcCheck key={cat} label={cat} checked={selCats.includes(cat)} onChange={() => toggleCat(cat)} />
                 ))}
               </div>
-
-              {/* Branding */}
               <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
                 <p style={{ color:"#00bcd4", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>📌 Branding Items</p>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
                   {BRANDING_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
                 </div>
               </div>
-
-              {/* Web */}
               <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
                 <p style={{ color:"#00bcd4", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🌐 Web & Online Items</p>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
                   {WEB_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
                 </div>
               </div>
-
-              {/* Other */}
               <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
                 <p style={{ color:"#00bcd4", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🎨 Other Service Items</p>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
                   {OTHER_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
                 </div>
               </div>
-
-              {/* Repair */}
               <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
                 <p style={{ color:"#2ecc71", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🔧 Repair Service Items</p>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
                   {REPAIR_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
                 </div>
               </div>
-
-              {/* Video */}
-              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px" }}>
+              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px", marginBottom:10 }}>
                 <p style={{ color:"#e74c8b", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>🎬 Video Editing Items</p>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
                   {VIDEO_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
                 </div>
               </div>
+              <div style={{ background:"#141c30", borderRadius:6, padding:"14px 16px" }}>
+                <p style={{ color:"#f39c12", fontSize:11.5, fontWeight:700, margin:"0 0 10px", letterSpacing:1, textTransform:"uppercase" }}>📸 Photo Editing Items</p>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"7px 10px" }}>
+                  {PHOTO_EDITING_ITEMS.map(item => <SvcCheck key={item} label={item} checked={selItems.includes(item)} onChange={() => toggleItem(item)} />)}
+                </div>
+              </div>
             </div>
-
-            {/* Selected summary */}
             {allSelected.length > 0 && (
               <div style={{ background:"#071a0e", border:"1px solid #00bcd4", borderRadius:4, padding:"10px 14px", margin:"16px 0 0" }}>
                 <p style={{ color:"#00bcd4", fontSize:11, fontWeight:700, margin:"0 0 5px", textTransform:"uppercase", letterSpacing:1 }}>✔ Selected ({allSelected.length}):</p>
                 <p style={{ color:"#ccc", fontSize:12.5, margin:0, lineHeight:1.7 }}>{allSelected.join(" · ")}</p>
               </div>
             )}
-
             <button
               onClick={() => validate() && setStep("preview")}
               style={{ width:"100%", padding:13, background:"#00bcd4", color:"#fff", border:"none", fontWeight:800, fontSize:14, letterSpacing:2, textTransform:"uppercase", cursor:"pointer", marginTop:20 }}
@@ -275,10 +267,8 @@ ${form.name}`;
             </button>
           </div>
         ) : (
-          /* EMAIL PREVIEW */
           <div style={{ padding:"24px 28px 32px" }}>
             <div style={{ background:"#141c30", border:"1px solid #2a3a5a", borderRadius:6, overflow:"hidden", marginBottom:20 }}>
-              {/* Meta */}
               <div style={{ padding:"14px 18px", borderBottom:"1px solid #2a3a5a" }}>
                 {[
                   ["To:", "Creationniel6@gmail.com", "#00bcd4"],
@@ -291,13 +281,10 @@ ${form.name}`;
                   </div>
                 ))}
               </div>
-              {/* Body */}
               <pre style={{ margin:0, padding:"18px", color:"#ccc", fontSize:13, lineHeight:1.9, whiteSpace:"pre-wrap", fontFamily:"'Courier New', monospace", background:"#0d1625" }}>
                 {emailBody}
               </pre>
             </div>
-
-            {/* Attach tip */}
             <div style={{ background:"#111c2e", border:"1px solid #1e3a2a", borderRadius:6, padding:"14px 16px", marginBottom:20 }}>
               <p style={{ color:"#00bcd4", fontWeight:700, fontSize:13, margin:"0 0 10px" }}>📎 How to attach files in Gmail (after clicking Send)</p>
               {[
@@ -314,7 +301,6 @@ ${form.name}`;
               ))}
               <p style={{ color:"#555", fontSize:11, marginTop:10, marginBottom:0 }}>💡 Pro tip: Max attachment in Gmail is 25MB. For larger files, share via Google Drive link or compress first.</p>
             </div>
-
             <div style={{ display:"flex", gap:12 }}>
               <button onClick={() => setStep("form")} style={{ flex:1, padding:12, background:"transparent", border:"1px solid #2a3a5a", color:"#aaa", fontWeight:700, fontSize:13, cursor:"pointer", letterSpacing:1 }}>
                 ← EDIT
@@ -353,33 +339,18 @@ export default function ServicesPage() {
 
       {/* ── HERO ── */}
       <section style={{ position:"relative", overflow:"hidden", minHeight:480, display:"flex", alignItems:"center", background:"#0a1628" }}>
-
-        {/* Animated gradient background */}
         <div style={{ position:"absolute", inset:0, background:"linear-gradient(135deg, #0a1628 0%, #0d2a3a 40%, #003d4d 100%)", zIndex:0 }} />
-
-        {/* Teal accent blobs */}
         <div style={{ position:"absolute", top:-80, right:-60, width:500, height:500, borderRadius:"50%", background:"radial-gradient(circle, rgba(0,188,212,0.18) 0%, transparent 70%)", zIndex:0 }} />
         <div style={{ position:"absolute", bottom:-100, left:"30%", width:350, height:350, borderRadius:"50%", background:"radial-gradient(circle, rgba(0,188,212,0.10) 0%, transparent 70%)", zIndex:0 }} />
-
-        {/* Diagonal stripe overlay */}
         <div style={{ position:"absolute", inset:0, backgroundImage:"repeating-linear-gradient(120deg, transparent, transparent 60px, rgba(0,188,212,0.03) 60px, rgba(0,188,212,0.03) 61px)", zIndex:0 }} />
-
-        {/* Left accent bar */}
         <div style={{ position:"absolute", left:0, top:0, bottom:0, width:5, background:"linear-gradient(to bottom, #00bcd4, #0097a7, transparent)", zIndex:2 }} />
-
-        {/* Content */}
         <div style={{ position:"relative", zIndex:2, display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"70px 80px" }}>
-
-          {/* Left: Text */}
           <div style={{ maxWidth:560 }}>
-            {/* Label */}
             <div style={{ display:"inline-flex", alignItems:"center", gap:14, marginBottom:26 }}>
               <span style={{ display:"inline-block", width:48, height:3, background:"linear-gradient(90deg,#00bcd4,#00e5ff)", borderRadius:2 }} />
               <span style={{ color:"#00e5ff", fontWeight:900, fontSize:20, letterSpacing:6, textTransform:"uppercase", textShadow:"0 0 20px rgba(0,229,255,0.45)" }}>Our Services</span>
               <span style={{ display:"inline-block", width:48, height:3, background:"linear-gradient(90deg,#00e5ff,#00bcd4)", borderRadius:2 }} />
             </div>
-
-            {/* Headline */}
             <h1 style={{ margin:"0 0 10px", padding:0, lineHeight:1.05 }}>
               <span style={{ display:"block", color:"#ffffff", fontSize:"clamp(32px,4.5vw,54px)", fontWeight:800, letterSpacing:-1 }}>Top Agency Quality</span>
               <span style={{ display:"block", color:"#ffffff", fontSize:"clamp(32px,4.5vw,54px)", fontWeight:800, letterSpacing:-1 }}>at only the</span>
@@ -387,11 +358,7 @@ export default function ServicesPage() {
                 Fraction of the price
               </span>
             </h1>
-
-            {/* Divider */}
             <div style={{ width:60, height:3, background:"linear-gradient(90deg,#00bcd4,transparent)", margin:"22px 0 24px", borderRadius:2 }} />
-
-            {/* Bullet list */}
             <ul style={{ listStyle:"none", padding:0, margin:"0 0 36px" }}>
               {[
                 "High Caliber Professional Branding & Applications",
@@ -407,8 +374,6 @@ export default function ServicesPage() {
                 </li>
               ))}
             </ul>
-
-            {/* CTA Button */}
             <button
               onClick={() => openModal(null)}
               style={{ position:"relative", overflow:"hidden", background:"linear-gradient(90deg,#00bcd4,#0097a7)", color:"#fff", border:"none", padding:"15px 40px", fontWeight:800, fontSize:13, letterSpacing:2.5, textTransform:"uppercase", cursor:"pointer", borderRadius:2, boxShadow:"0 8px 32px rgba(0,188,212,0.35)", transition:"transform 0.2s, box-shadow 0.2s" }}
@@ -418,18 +383,11 @@ export default function ServicesPage() {
               MAKE AN INQUIRY →
             </button>
           </div>
-
-          {/* Right: Visual graphic */}
           <div style={{ position:"relative", flexShrink:0, width:360, height:360 }}>
-            {/* Outer ring */}
             <div style={{ position:"absolute", inset:0, borderRadius:"50%", border:"1px solid rgba(0,188,212,0.15)" }} />
             <div style={{ position:"absolute", inset:20, borderRadius:"50%", border:"1px dashed rgba(0,188,212,0.2)" }} />
             <div style={{ position:"absolute", inset:50, borderRadius:"50%", border:"1px solid rgba(0,188,212,0.1)", background:"rgba(0,188,212,0.04)" }} />
-
-            {/* Center glow */}
             <div style={{ position:"absolute", inset:"50%", transform:"translate(-50%,-50%)", width:120, height:120, borderRadius:"50%", background:"radial-gradient(circle,rgba(0,188,212,0.25) 0%,transparent 70%)" }} />
-
-            {/* Service icon cards orbiting */}
             {[
               { label:"Branding", icon:"🎨", angle:0 },
               { label:"Web Dev", icon:"💻", angle:90 },
@@ -437,8 +395,7 @@ export default function ServicesPage() {
               { label:"Photography", icon:"📷", angle:270 },
             ].map(({ label, icon, angle }) => {
               const rad = (angle * Math.PI) / 180;
-              const r = 130;
-              const cx = 180, cy = 180;
+              const r = 130, cx = 180, cy = 180;
               const x = cx + r * Math.sin(rad) - 42;
               const y = cy - r * Math.cos(rad) - 22;
               return (
@@ -448,35 +405,24 @@ export default function ServicesPage() {
                 </div>
               );
             })}
-
-            {/* Center SVG figure */}
             <svg viewBox="0 0 120 140" width="120" height="140" style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", opacity:0.9 }}>
-              {/* Head */}
               <circle cx="60" cy="22" r="14" fill="none" stroke="#00bcd4" strokeWidth="2.5" />
-              {/* Body */}
               <line x1="60" y1="36" x2="60" y2="85" stroke="#00bcd4" strokeWidth="2.5" strokeLinecap="round" />
-              {/* Arms — raised dynamically */}
               <path d="M60,50 Q35,38 22,48" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
               <path d="M60,50 Q85,38 98,48" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-              {/* Legs */}
               <path d="M60,85 Q45,105 36,120" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
               <path d="M60,85 Q75,105 84,120" stroke="#00bcd4" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-              {/* Speed lines */}
               <line x1="5" y1="60" x2="25" y2="60" stroke="rgba(0,188,212,0.4)" strokeWidth="1.5" strokeLinecap="round" />
               <line x1="8" y1="72" x2="22" y2="72" stroke="rgba(0,188,212,0.25)" strokeWidth="1.5" strokeLinecap="round" />
               <line x1="95" y1="60" x2="115" y2="60" stroke="rgba(0,188,212,0.4)" strokeWidth="1.5" strokeLinecap="round" />
               <line x1="98" y1="72" x2="112" y2="72" stroke="rgba(0,188,212,0.25)" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
-
-            {/* Stats badge */}
             <div style={{ position:"absolute", bottom:10, right:10, background:"rgba(0,188,212,0.12)", border:"1px solid rgba(0,188,212,0.35)", borderRadius:8, padding:"10px 16px", textAlign:"center", backdropFilter:"blur(8px)" }}>
               <p style={{ color:"#00bcd4", fontSize:22, fontWeight:900, margin:0, lineHeight:1 }}>100%</p>
               <p style={{ color:"rgba(255,255,255,0.7)", fontSize:10.5, margin:"3px 0 0", letterSpacing:0.5 }}>Client Satisfaction</p>
             </div>
           </div>
         </div>
-
-        {/* Bottom wave divider */}
         <div style={{ position:"absolute", bottom:0, left:0, right:0, zIndex:1 }}>
           <svg viewBox="0 0 1440 40" preserveAspectRatio="none" style={{ display:"block", width:"100%", height:40 }}>
             <path d="M0,20 Q360,0 720,20 Q1080,40 1440,20 L1440,40 L0,40 Z" fill="#f4f4f4" />
@@ -508,14 +454,14 @@ export default function ServicesPage() {
           ))}
         </div>
 
-        {/* Row 2: 2 new cards — centered */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:0, maxWidth: 734, margin:"0 auto" }}>
+        {/* Row 2: 3 cards — Repair, Video, Photo Editing */}
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:0, maxWidth:1100, margin:"0 auto" }}>
           {[
             { key:"repair", img:serviceImages.repair, bg:"#1a2a1a", title:"Repair Services", desc:"We provide fast, reliable repair solutions for your electronics, gadgets, and devices. From screen fixes to full hardware overhauls — we've got you covered.", items:REPAIR_ITEMS, cat:"Repair Services", accent:"#2ecc71" },
             { key:"video", img:serviceImages.video, bg:"#1a1a3a", title:"Video Editing", desc:"We craft compelling video content that tells your brand's story. From corporate films to social reels — professional editing that captivates your audience.", items:VIDEO_ITEMS, cat:"Video Editing", accent:"#e74c8b" },
+            { key:"photo", img:serviceImages.photo, bg:"#2a1a0a", title:"Photo Editing", desc:"We deliver flawless photo retouching and enhancement services. From skin retouching to full composite editing — we make every image picture-perfect.", items:PHOTO_EDITING_ITEMS, cat:"Photo Editing", accent:"#f39c12" },
           ].map(({ key, img, bg, title, desc, items, cat, accent }) => (
             <div key={key} style={{ background:"#fff", overflow:"hidden", border:"1px solid #e8e8e8", borderTop:"none", position:"relative" }}>
-              {/* Accent top bar */}
               <div style={{ height:4, background:`linear-gradient(90deg, ${accent}, #00bcd4)`, position:"absolute", top:0, left:0, right:0, zIndex:1 }} />
               <div style={{ height:200, overflow:"hidden", background:bg }}>
                 <img src={img} alt={title} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:0.9 }} />
